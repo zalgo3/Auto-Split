@@ -27,6 +27,8 @@ def getSaveSettingsValues(self):
     self.custom_pause_times_setting = 0
     self.custom_thresholds_setting = 1
 
+    self.legacy_capture = int(self.legacyCaptureCheckBox.isChecked())
+
     if self.groupDummySplitsCheckBox.isChecked():
         self.group_dummy_splits_undo_skip_setting = 1
     else:
@@ -64,11 +66,12 @@ def haveSettingsChanged(self):
         self.custom_thresholds_setting,
         self.group_dummy_splits_undo_skip_setting,
         self.loop_setting,
-        self.auto_start_on_reset_setting]
+        self.auto_start_on_reset_setting,
+        self.legacy_capture]
 
-    #one small caveat in this: if you load a settings file from an old version, but dont change settings,
-    #the current save settings and last load settings will have different # of elements and it will ask
-    #the user to save changes upon closing even though there were none
+    # one small caveat in this: if you load a settings file from an old version, but dont change settings,
+    # the current save settings and last load settings will have different # of elements and it will ask
+    # the user to save changes upon closing even though there were none
     if self.current_save_settings == self.last_loaded_settings or self.current_save_settings == self.last_saved_settings:
         return False
     else:
@@ -99,7 +102,8 @@ def saveSettings(self):
             self.custom_thresholds_setting,
             self.group_dummy_splits_undo_skip_setting,
             self.loop_setting,
-            self.auto_start_on_reset_setting]
+            self.auto_start_on_reset_setting,
+            self.legacy_capture]
         # save settings to a .pkl file
         with open(self.last_successfully_loaded_settings_file_path, 'wb') as f:
             pickle.dump(self.last_saved_settings, f)
@@ -133,7 +137,8 @@ def saveSettingsAs(self):
         self.custom_thresholds_setting,
         self.group_dummy_splits_undo_skip_setting,
         self.loop_setting,
-        self.auto_start_on_reset_setting]
+        self.auto_start_on_reset_setting,
+        self.legacy_capture]
 
     # save settings to a .pkl file
     with open(self.save_settings_file_path, 'wb') as f:
@@ -198,8 +203,9 @@ def loadSettings(self):
                         self.custom_thresholds_setting,
                         self.group_dummy_splits_undo_skip_setting,
                         self.loop_setting,
-                        self.auto_start_on_reset_setting] = pickle.load(f)
-            #v1.3-1.4 settings. add a blank pause key.
+                        self.auto_start_on_reset_setting,
+                        self.legacy_capture] = pickle.load(f)
+            # v1.3-1.4 settings. add a blank pause key.
             elif self.settings_count == 18:
                 with open(self.load_settings_file_path, 'rb') as f:
                     self.last_loaded_settings = [
@@ -220,7 +226,8 @@ def loadSettings(self):
                         self.custom_pause_times_setting,
                         self.custom_thresholds_setting,
                         self.group_dummy_splits_undo_skip_setting,
-                        self.loop_setting] = pickle.load(f)
+                        self.loop_setting,
+                        self.legacy_capture] = pickle.load(f)
                 self.pause_key = ''
                 self.auto_start_on_reset_setting = 0
             elif self.settings_count < 18:
@@ -243,6 +250,7 @@ def loadSettings(self):
         self.groupDummySplitsCheckBox.setChecked(self.group_dummy_splits_undo_skip_setting == 1)
         self.loopCheckBox.setChecked(self.loop_setting == 1)
         self.autostartonresetCheckBox.setChecked(self.auto_start_on_reset_setting == 1)
+        self.legacyCaptureCheckBox.setChecked(self.legacy_capture == 1)
 
         # TODO: Reuse code from hotkeys rather than duplicating here
         # try to set hotkeys from when user last closed the window
@@ -252,9 +260,9 @@ def loadSettings(self):
         except (AttributeError, KeyError):
             pass
         try:
-          if self.is_auto_controlled == False:
-            self.splitLineEdit.setText(self.split_key)
-            self.split_hotkey = keyboard.hook_key(str(self.split_key), lambda e: _hotkey_action(e, self.split_key, self.startAutoSplitter))
+            if self.is_auto_controlled is False:
+                self.splitLineEdit.setText(self.split_key)
+                self.split_hotkey = keyboard.hook_key(str(self.split_key), lambda e: _hotkey_action(e, self.split_key, self.startAutoSplitter))
         except (ValueError, KeyError):
             pass
 
