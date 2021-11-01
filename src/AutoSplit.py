@@ -227,7 +227,7 @@ class AutoSplit(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
             ctypes.windll.user32.SetProcessDPIAware()
 
-            capture = capture_windows.capture_region(self.hwnd, self.rect)
+            capture = capture_windows.capture_region(self.hwnd, self.rect, self.legacyCaptureCheckBox.isChecked())
             capture = cv2.resize(capture, (240, 180))
             capture = cv2.cvtColor(capture, cv2.COLOR_BGRA2RGB)
 
@@ -412,7 +412,7 @@ class AutoSplit(QtWidgets.QMainWindow, design.Ui_MainWindow):
             i = i + 1
 
         # grab screenshot of capture region
-        capture = capture_windows.capture_region(self.hwnd, self.rect)
+        capture = capture_windows.capture_region(self.hwnd, self.rect, self.legacyCaptureCheckBox.isChecked())
         capture = cv2.cvtColor(capture, cv2.COLOR_BGRA2BGR)
 
         # save and open image
@@ -455,7 +455,7 @@ class AutoSplit(QtWidgets.QMainWindow, design.Ui_MainWindow):
         t0 = time.time()
         while count < 10:
 
-            capture = capture_windows.capture_region(self.hwnd, self.rect)
+            capture = capture_windows.capture_region(self.hwnd, self.rect, self.legacyCaptureCheckBox.isChecked())
             capture = cv2.resize(capture, (self.RESIZE_WIDTH, self.RESIZE_HEIGHT))
             capture = cv2.cvtColor(capture, cv2.COLOR_BGRA2RGB)
 
@@ -956,7 +956,7 @@ class AutoSplit(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def getCaptureForComparison(self):
         # grab screenshot of capture region
-        capture = capture_windows.capture_region(self.hwnd, self.rect)
+        capture = capture_windows.capture_region(self.hwnd, self.rect, self.legacyCaptureCheckBox.isChecked())
         # Capture with nearest neighbor interpolation
         capture = cv2.resize(capture, (self.RESIZE_WIDTH, self.RESIZE_HEIGHT), interpolation=cv2.INTER_NEAREST)
         # convert to BGR
