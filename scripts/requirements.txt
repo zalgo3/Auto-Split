@@ -10,10 +10,10 @@
 # Creating AutoSplit.exe with PyInstaller: ./build.bat
 #
 # Comment this out if you don't want to create AutoSplit.exe:
-PyInstaller
+# PyInstaller
 #
 # Comment this out if you don't want to install the PyQt designer
-PyQt6-tools
+# PyQt6-tools
 #
 # Other dependencies:
 PyQt6
@@ -24,3 +24,4 @@ pywin32
 keyboard
 pyautogui
 PySide6
+mss
