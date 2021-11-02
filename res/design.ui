@@ -1084,7 +1084,7 @@ Default value</string>
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration in Windows 11.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Legacy Capture</string>

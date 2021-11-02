@@ -474,7 +474,7 @@ class Ui_MainWindow(object):
         self.autostartonresetCheckBox.setText(_translate("MainWindow", "Auto Start On Reset"))
         self.startImageReloadButton.setText(_translate("MainWindow", "Reload Start Image"))
         self.startImageLabel.setText(_translate("MainWindow", "Start image:"))
-        self.legacyCaptureCheckBox.setToolTip(_translate("MainWindow", "<html><head/><body><p>Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration in Windows 11.</p></body></html>"))
+        self.legacyCaptureCheckBox.setToolTip(_translate("MainWindow", "<html><head/><body><p>Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration.</p></body></html>"))
         self.legacyCaptureCheckBox.setText(_translate("MainWindow", "Legacy Capture"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
