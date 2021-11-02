@@ -1075,6 +1075,14 @@ Default value</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="legacyCaptureCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>271</y>
+      <width>105</width>
+      <height>20</height>
+     </rect>
+    </property>
     <property name="toolTip">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration in Windows 11.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>

@@ -306,6 +306,7 @@ class Ui_MainWindow(object):
         self.startImageLabel.setGeometry(QtCore.QRect(120, 270, 241, 16))
         self.startImageLabel.setObjectName("startImageLabel")
         self.legacyCaptureCheckBox = QtWidgets.QCheckBox(self.centralwidget)
+        self.legacyCaptureCheckBox.setGeometry(QtCore.QRect(8, 271, 105, 20))
         self.legacyCaptureCheckBox.setChecked(True)
         self.legacyCaptureCheckBox.setObjectName("legacyCaptureCheckBox")
         self.splitimagefolderLabel.raise_()
