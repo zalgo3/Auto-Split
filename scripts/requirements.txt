@@ -19,6 +19,7 @@ pywin32
 keyboard
 pyautogui
 PySide6
+mss
 #
 # Comment this out if you don't want to create AutoSplit.exe:
 PyInstaller

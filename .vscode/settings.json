@@ -46,4 +46,5 @@
     "*.qrc": "xml",
     "*.ui": "xml"
   },
+  "python.formatting.provider": "black",
 }

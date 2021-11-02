@@ -1074,6 +1074,22 @@ Default value</string>
      <string>Start image:</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="legacyCaptureCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>271</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture may result in higher max FPS, but will likely not support hardware accelerated regions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>Legacy Capture</string>
+    </property>
+   </widget>
    <zorder>splitimagefolderLabel</zorder>
    <zorder>splitimagefolderLineEdit</zorder>
    <zorder>browseButton</zorder>
@@ -1138,6 +1154,7 @@ Default value</string>
    <zorder>autostartonresetCheckBox</zorder>
    <zorder>startImageReloadButton</zorder>
    <zorder>startImageLabel</zorder>
+   <zorder>legacyCaptureCheckBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -1145,7 +1162,7 @@ Default value</string>
      <x>0</x>
      <y>0</y>
      <width>632</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
