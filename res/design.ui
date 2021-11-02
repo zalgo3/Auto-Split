@@ -1075,19 +1075,14 @@ Default value</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="legacyCaptureCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>8</x>
-      <y>271</y>
-      <width>100</width>
-      <height>20</height>
-     </rect>
-    </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture may result in higher max FPS, but will likely not support hardware accelerated regions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Legacy capture results in higher max FPS and captures windows regardless of overlapping. But does not support hardware acceleration in Windows 11.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Legacy Capture</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
     </property>
    </widget>
    <zorder>splitimagefolderLabel</zorder>
@@ -1162,7 +1157,7 @@ Default value</string>
      <x>0</x>
      <y>0</y>
      <width>632</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">

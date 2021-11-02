@@ -1,8 +1,7 @@
 #!/usr/bin/python3.9
 # -*- coding: utf-8 -*-
 
-from compare import checkIfImageHasTransparency
-from menu_bar import about, VERSION, viewHelp
+from platform import platform
 from PyQt6 import QtCore, QtGui, QtTest, QtWidgets
 from win32 import win32gui
 import sys
@@ -12,9 +11,12 @@ import cv2
 import ctypes.wintypes
 import ctypes
 import numpy as np
+import re
 import threading
 import time
 
+from compare import checkIfImageHasTransparency
+from menu_bar import about, VERSION, viewHelp
 from hotkeys import send_hotkey
 import design
 import compare
@@ -186,6 +188,12 @@ class AutoSplit(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.start_image = None
         self.highest_similarity = 0.0
         self.check_start_image_timestamp = 0.0
+
+        # Legacy capture unchecked by default on Windows 11 (Windows-10-10.0.22000-SP0)
+        platform_tokens = re.split('\\.|-', platform())
+        if (platform_tokens[1] == '11' or int(platform_tokens[4]) >= 22000):
+            print('hi')
+            self.legacyCaptureCheckBox.setChecked(False)
 
         # Try to load start image
         self.loadStartImage(wait_for_delay=False)
