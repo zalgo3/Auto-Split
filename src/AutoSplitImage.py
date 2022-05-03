@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 import cv2
 import numpy as np
+from imagehash import ImageHash
 from win32con import MAXBYTE
 
 import error_messages
@@ -18,6 +19,9 @@ if TYPE_CHECKING:
 COMPARISON_RESIZE_WIDTH = 320
 COMPARISON_RESIZE_HEIGHT = 240
 COMPARISON_RESIZE = (COMPARISON_RESIZE_WIDTH, COMPARISON_RESIZE_HEIGHT)
+LOWER_BOUND = np.array([0, 0, 0, 1], dtype="uint8")
+UPPER_BOUND = np.array([MAXBYTE, MAXBYTE, MAXBYTE, MAXBYTE], dtype="uint8")
+comparison_functions = [compare_l2_norm, compare_histograms, compare_phash]
 
 
 class ImageType(Enum):
@@ -34,6 +38,9 @@ class AutoSplitImage():
     image_type: ImageType
     bytes: Optional[cv2.ndarray] = None
     mask: Optional[cv2.ndarray] = None
+    cached_l2_norm_max_error: Optional[float] = None
+    cached_histogram: Optional[cv2.ndarray] = None
+    cached_phash: Optional[ImageHash] = None
     # This value is internal, check for mask instead
     _has_transparency: bool
     # These values should be overriden by Defaults if None. Use getters instead
@@ -108,9 +115,7 @@ class AutoSplitImage():
         # If image has transparency, create a mask
         if self._has_transparency:
             # Create mask based on resized, nearest neighbor interpolated split image
-            lower = np.array([0, 0, 0, 1], dtype="uint8")
-            upper = np.array([MAXBYTE, MAXBYTE, MAXBYTE, MAXBYTE], dtype="uint8")
-            self.mask = cv2.inRange(image, lower, upper)
+            self.mask = cv2.inRange(image, LOWER_BOUND, UPPER_BOUND)
         # Add Alpha channel if missing
         elif image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
@@ -128,17 +133,10 @@ class AutoSplitImage():
         """
         Compare image with capture using image's comparison method. Falls back to combobox
         """
-
-        if self.bytes is None or not self.bytes.size or capture is None or not self.bytes.size:
-            return 0.0
         comparison_method = self.__get_comparison_method(default)
-        if comparison_method == 0:
-            return compare_l2_norm(self.bytes, capture, self.mask)
-        if comparison_method == 1:
-            return compare_histograms(self.bytes, capture, self.mask)
-        if comparison_method == 2:
-            return compare_phash(self.bytes, capture, self.mask)
-        return 0.0
+        if self.bytes is None or not self.bytes.size or capture is None or not self.bytes.size or comparison_method > 2:
+            return 0.0
+        return comparison_functions[comparison_method](self, capture)
 
 
 if True:  # pylint: disable=using-constant-test
