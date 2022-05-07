@@ -62,6 +62,8 @@ CAPTURE_METHODS = OrderedDict({
         short_description="fast, most compatible but less features",
         description=(
             f"\nOnly available in Windows 10.0.{WCG_MIN_BUILD} and up. "
+            "\nDue to current technical limitations, it requires having at least one "
+            "\naudio or video Capture Device connected and enabled. Even if it won't be used. "
             "\nAllows recording UWP apps, Hardware Accelerated and Exclusive Fullscreen windows. "
             "\nCaps at around 60 FPS. "
         ),
