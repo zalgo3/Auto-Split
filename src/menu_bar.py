@@ -13,10 +13,10 @@ from winsdk.windows.graphics.capture.interop import create_for_window
 
 import error_messages
 import user_profile
-from capture_method import CAPTURE_METHODS, CaptureMethod, get_capture_method_by_index, get_capture_method_index
+from CaptureMethod import CAPTURE_METHODS, CaptureMethod, get_capture_method_by_index, get_capture_method_index
 from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa: F401
 from hotkeys import set_hotkey
-from screen_region import create_windows_graphics_capture
+from region_selection import create_windows_graphics_capture
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
