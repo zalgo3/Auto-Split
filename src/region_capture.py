@@ -142,6 +142,8 @@ def capture_region(autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
     @return: The image of the region in the window in BGRA format
     """
     hwnd = autosplit.hwnd
+    if not hwnd:
+        return None, False
     selection = autosplit.settings_dict["capture_region"]
     capture_method = autosplit.settings_dict["capture_method"]
 

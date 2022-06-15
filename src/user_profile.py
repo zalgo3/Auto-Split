@@ -4,7 +4,6 @@ import os
 import sys
 from typing import TYPE_CHECKING, TypedDict, Union, cast
 
-import cv2
 import keyboard
 import toml
 from PyQt6 import QtCore, QtWidgets
@@ -12,7 +11,6 @@ from win32 import win32gui
 from winsdk.windows.graphics.capture.interop import create_for_window
 
 import error_messages
-from AutoSplitImage import COMPARISON_RESIZE_HEIGHT, COMPARISON_RESIZE_WIDTH
 from CaptureMethod import CAPTURE_METHODS, CaptureMethod
 from gen import design
 from hotkeys import set_hotkey
