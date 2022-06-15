@@ -78,6 +78,8 @@ def select_region(autosplit: AutoSplit):
     autosplit.hwnd = hwnd
     autosplit.settings_dict["captured_window_title"] = window_text
     if autosplit.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE:
+        if autosplit.windows_graphics_capture:
+            autosplit.windows_graphics_capture.close()
         autosplit.windows_graphics_capture = create_windows_graphics_capture(create_for_window(hwnd))
 
     offset_x, offset_y, *_ = win32gui.GetWindowRect(hwnd)
@@ -94,7 +96,18 @@ class WindowsGraphicsCapture:
     frame_pool: Direct3D11CaptureFramePool
     # Prevent session from being garbage collected
     session: GraphicsCaptureSession
-    last_captured_frame: Optional[cv2.ndarray]
+    last_captured_frame: Optional[cv2.Mat]
+
+    def close(self):
+        self.frame_pool.close()
+        try:
+            self.session.close()
+        except OSError:
+            # OSError: The application called an interface that was marshalled for a different thread
+            # This still seems to close the session and prevent the following hard crash in LiveSplit
+            # pylint: disable=line-too-long
+            # "AutoSplit.exe	<process started at 00:05:37.020 has terminated with 0xc0000409 (EXCEPTION_STACK_BUFFER_OVERRUN)>"  # noqa: E501
+            pass
 
 
 def create_windows_graphics_capture(item: GraphicsCaptureItem):
@@ -124,7 +137,7 @@ def create_windows_graphics_capture(item: GraphicsCaptureItem):
     return WindowsGraphicsCapture(item.size, frame_pool, session, None)
 
 
-def __select_graphics_item(autosplit: AutoSplit):  # pyright: reportUnusedFunction=false
+def __select_graphics_item(autosplit: AutoSplit):  # pyright: ignore [reportUnusedFunction]
     # TODO: For later as a different picker option
     """
     Uses the built-in GraphicsCapturePicker to select the Window
@@ -142,10 +155,12 @@ def __select_graphics_item(autosplit: AutoSplit):  # pyright: reportUnusedFuncti
         if not item:
             return
         autosplit.settings_dict["captured_window_title"] = item.display_name
+        if autosplit.windows_graphics_capture:
+            autosplit.windows_graphics_capture.close()
         autosplit.windows_graphics_capture = create_windows_graphics_capture(item)
 
     picker = GraphicsCapturePicker()
-    initialize_with_window(picker, autosplit.effectiveWinId().__int__())
+    initialize_with_window(picker, int(autosplit.effectiveWinId()))
     async_operation = picker.pick_single_item_async()
     # None if the selection is canceled
     if async_operation:
@@ -175,6 +190,8 @@ def select_window(autosplit: AutoSplit):
     autosplit.hwnd = hwnd
     autosplit.settings_dict["captured_window_title"] = window_text
     if autosplit.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE:
+        if autosplit.windows_graphics_capture:
+            autosplit.windows_graphics_capture.close()
         autosplit.windows_graphics_capture = create_windows_graphics_capture(create_for_window(hwnd))
 
     # Getting window bounds
@@ -279,7 +296,7 @@ def __set_region_values(autosplit: AutoSplit, left: int, top: int, width: int, h
     autosplit.height_spinbox.setValue(height)
 
 
-def __test_alignment(capture: cv2.ndarray, template: cv2.ndarray):  # pylint: disable=too-many-locals
+def __test_alignment(capture: cv2.Mat, template: cv2.Mat):  # pylint: disable=too-many-locals
     """
     Obtain the best matching point for the template within the
     capture. This assumes that the template is actually smaller
@@ -337,10 +354,9 @@ def validate_before_parsing(autosplit: AutoSplit, show_error: bool = True, check
 
 
 def check_selected_region_exists(autosplit: AutoSplit):
-    return (
-        autosplit.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE
-        and autosplit.windows_graphics_capture) \
-        or (autosplit.hwnd > 0 and win32gui.GetWindowText(autosplit.hwnd))
+    if autosplit.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE:
+        return bool(autosplit.windows_graphics_capture)
+    return bool(autosplit.hwnd > 0 and win32gui.GetWindowText(autosplit.hwnd))
 
 
 class BaseSelectWidget(QtWidgets.QWidget):

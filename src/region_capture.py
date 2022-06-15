@@ -36,7 +36,7 @@ class Region(TypedDict):
 
 
 def __bit_blt_capture(hwnd: int, selection: Region, render_full_content: bool = False):
-    image: Optional[cv2.ndarray] = None
+    image: Optional[cv2.Mat] = None
     # If the window closes while it's being manipulated, it could cause a crash
     try:
         window_dc = win32gui.GetWindowDC(hwnd)
@@ -59,8 +59,7 @@ def __bit_blt_capture(hwnd: int, selection: Region, render_full_content: bool = 
         image = np.frombuffer(cast(bytes, bitmap.GetBitmapBits(True)), dtype=np.uint8)
         image.shape = (selection["height"], selection["width"], 4)
     # https://github.com/kaluluosi/pywin32-stubs/issues/5
-    # pylint: disable=no-member
-    except (win32ui.error, pywintypes.error):  # type: ignore
+    except (win32ui.error, pywintypes.error):  # pyright: ignore [reportGeneralTypeIssues] pylint: disable=no-member
         return None
     # We already obtained the image, so we can ignore errors during cleanup
     try:
@@ -69,7 +68,7 @@ def __bit_blt_capture(hwnd: int, selection: Region, render_full_content: bool = 
         win32gui.ReleaseDC(hwnd, window_dc)
         win32gui.DeleteObject(bitmap.GetHandle())
     # https://github.com/kaluluosi/pywin32-stubs/issues/5
-    except win32ui.error:  # type: ignore
+    except win32ui.error:  # pyright: ignore [reportGeneralTypeIssues]
         pass
     return image
 
@@ -97,7 +96,11 @@ def __windows_graphics_capture(windows_graphics_capture: Optional[WindowsGraphic
     if not windows_graphics_capture or not windows_graphics_capture.frame_pool:
         return None, False
 
-    frame = windows_graphics_capture.frame_pool.try_get_next_frame()
+    try:
+        frame = windows_graphics_capture.frame_pool.try_get_next_frame()
+    # Frame pool is closed
+    except OSError:
+        return None, False
     if not frame:
         return windows_graphics_capture.last_captured_frame, True
 
@@ -114,7 +117,7 @@ def __windows_graphics_capture(windows_graphics_capture: Optional[WindowsGraphic
     if not software_bitmap:
         # HACK: Can happen when starting the region selector
         return windows_graphics_capture.last_captured_frame, True
-        raise ValueError("Unable to convert Direct3D11CaptureFrame to SoftwareBitmap.")
+        # raise ValueError("Unable to convert Direct3D11CaptureFrame to SoftwareBitmap.")
     bitmap_buffer = software_bitmap.lock_buffer(BitmapBufferAccessMode.READ_WRITE)
     if not bitmap_buffer:
         raise ValueError("Unable to obtain the BitmapBuffer from SoftwareBitmap.")
@@ -129,7 +132,7 @@ def __windows_graphics_capture(windows_graphics_capture: Optional[WindowsGraphic
     return image, False
 
 
-def capture_region(autosplit: AutoSplit) -> tuple[Optional[cv2.ndarray], bool]:
+def capture_region(autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
     """
     Captures an image of the region for a window matching the given
     parameters of the bounding box
@@ -154,7 +157,7 @@ def capture_region(autosplit: AutoSplit) -> tuple[Optional[cv2.ndarray], bool]:
     return __bit_blt_capture(hwnd, selection, capture_method == CaptureMethod.PRINTWINDOW_RENDERFULLCONTENT), False
 
 
-def set_ui_image(qlabel: QLabel, image: Optional[cv2.ndarray], transparency: bool):
+def set_ui_image(qlabel: QLabel, image: Optional[cv2.Mat], transparency: bool):
     if image is None or not image.size:
         # Clear current pixmap if image is None. But don't clear text
         if not qlabel.text():

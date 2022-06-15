@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import TYPE_CHECKING, TypedDict, cast
+from typing import TYPE_CHECKING, TypedDict, Union, cast
 
+import cv2
 import keyboard
 import toml
 from PyQt6 import QtCore, QtWidgets
@@ -11,10 +12,11 @@ from win32 import win32gui
 from winsdk.windows.graphics.capture.interop import create_for_window
 
 import error_messages
-from CaptureMethod import CAPTURE_METHODS, CaptureMethod, get_capture_method_by_index
+from AutoSplitImage import COMPARISON_RESIZE_HEIGHT, COMPARISON_RESIZE_WIDTH
+from CaptureMethod import CAPTURE_METHODS, CaptureMethod
 from gen import design
 from hotkeys import set_hotkey
-from region_capture import CaptureMethod, Region
+from region_capture import Region
 from region_selection import create_windows_graphics_capture
 
 if TYPE_CHECKING:
@@ -33,7 +35,7 @@ class UserProfileDict(TypedDict):
     pause_hotkey: str
     fps_limit: int
     live_capture_region: bool
-    capture_method: CaptureMethod
+    capture_method: Union[str, CaptureMethod]
     default_comparison_method: int
     default_similarity_threshold: float
     default_delay_time: int
@@ -53,7 +55,7 @@ DEFAULT_PROFILE = UserProfileDict(
     pause_hotkey="",
     fps_limit=60,
     live_capture_region=True,
-    capture_method=get_capture_method_by_index(0),
+    capture_method=CAPTURE_METHODS.get_method_by_index(0),
     default_comparison_method=0,
     default_similarity_threshold=0.95,
     default_delay_time=0,
@@ -143,6 +145,8 @@ def __load_settings_from_file(autosplit: AutoSplit, load_settings_file_path: str
         if hwnd:
             autosplit.hwnd = hwnd
             if autosplit.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE:
+                if autosplit.windows_graphics_capture:
+                    autosplit.windows_graphics_capture.close()
                 autosplit.windows_graphics_capture = create_windows_graphics_capture(create_for_window(hwnd))
         else:
             autosplit.live_image.setText("Reload settings after opening"

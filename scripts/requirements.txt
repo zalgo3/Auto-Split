@@ -1,6 +1,6 @@
 # Requirements file for AutoSplit
 #
-# Python: CPython 3.8+
+# Python: CPython 3.9+
 #
 # Usage: .\scripts\install.bat
 #
@@ -10,8 +10,8 @@
 # Creating AutoSplit.exe with PyInstaller: .\scripts\build.bat
 #
 # Dependencies:
-numpy>=1.22.0rc1
-opencv-python>=4.5.4
+numpy>=1.22.0rc1,<1.23
+opencv-python-headless>=4.5.4,<4.6
 PyQt6>=6.2.1
 PySide6
 ImageHash
@@ -34,7 +34,7 @@ flake8-pyi
 flake8-quotes
 flake8-isort
 pylint>=2.13
-git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs # https://github.com/kaluluosi/pywin32-stubs/pull/4
+pywin32-stubs>=0.1.6
 simplejson
 types-simplejson>=3.17.2
 types-requests

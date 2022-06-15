@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import webbrowser
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Union, cast
 
 import requests
 from packaging import version
@@ -13,7 +13,7 @@ from winsdk.windows.graphics.capture.interop import create_for_window
 
 import error_messages
 import user_profile
-from CaptureMethod import CAPTURE_METHODS, CaptureMethod, get_capture_method_by_index, get_capture_method_index
+from CaptureMethod import CAPTURE_METHODS, CaptureMethod
 from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa: F401
 from hotkeys import set_hotkey
 from region_selection import create_windows_graphics_capture
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from AutoSplit import AutoSplit
 
 # AutoSplit Version number
-VERSION = "1.6.1"
+AUTOSPLIT_VERSION = "2.0.0-alpha.3"
 
 # About Window
 
@@ -33,7 +33,7 @@ class __AboutWidget(QtWidgets.QWidget, about.Ui_AboutAutoSplitWidget):
         self.setupUi(self)
         self.created_by_label.setOpenExternalLinks(True)
         self.donate_button_label.setOpenExternalLinks(True)
-        self.version_label.setText(f"Version: {VERSION}")
+        self.version_label.setText(f"Version: {AUTOSPLIT_VERSION}")
         self.show()
 
 
@@ -45,12 +45,12 @@ class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
     def __init__(self, latest_version: str, design_window: design.Ui_MainWindow, check_on_open: bool = False):
         super().__init__()
         self.setupUi(self)
-        self.current_version_number_label.setText(VERSION)
+        self.current_version_number_label.setText(AUTOSPLIT_VERSION)
         self.latest_version_number_label.setText(latest_version)
         self.left_button.clicked.connect(self.open_update)
         self.do_not_ask_again_checkbox.stateChanged.connect(self.do_not_ask_me_again_state_changed)
         self.design_window = design_window
-        if version.parse(latest_version) > version.parse(VERSION):
+        if version.parse(latest_version) > version.parse(AUTOSPLIT_VERSION):
             self.do_not_ask_again_checkbox.setVisible(check_on_open)
             self.show()
         elif not check_on_open:
@@ -100,6 +100,16 @@ def check_for_updates(autosplit: AutoSplit, check_on_open: bool = False):
     autosplit.CheckForUpdatesThread.start()
 
 
+def get_capture_method_index(capture_method: Union[str, CaptureMethod]):
+    """
+    Returns 0 if the capture_method is invalid or unsupported
+    """
+    try:
+        return list(CAPTURE_METHODS.keys()).index(cast(CaptureMethod, capture_method))
+    except ValueError:
+        return 0
+
+
 class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
     def __update_default_threshold(self, value: Any):
         self.__set_value("default_similarity_threshold", value)
@@ -116,8 +126,14 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.autosplit.settings_dict[key] = value
 
     def __capture_method_changed(self):
-        selected_capture_method = get_capture_method_by_index(self.capture_method_combobox.currentIndex())
+        selected_capture_method = CAPTURE_METHODS.get_method_by_index(self.capture_method_combobox.currentIndex())
+        # Release or start video capture device
+        if self.autosplit.windows_graphics_capture:
+            self.autosplit.windows_graphics_capture.close()
         self.autosplit.windows_graphics_capture = None
+
+        self.autosplit.select_region_button.setDisabled(False)
+        self.autosplit.select_window_button.setDisabled(False)
         # Recover window from name
         hwnd = win32gui.FindWindow(None, self.autosplit.settings_dict["captured_window_title"])
         # Don't fallback to desktop
@@ -133,23 +149,25 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.autosplit = autosplit
 
 # region Build the Capture method combobox
-        capture_methods = [
-            f"- {method['name']} ({method['short_description']})"
-            for method in CAPTURE_METHODS.values()]
+        capture_method_values = CAPTURE_METHODS.values()
+        capture_list_items = [
+            f"- {method.name} ({method.short_description})"
+            for method in capture_method_values
+        ]
         list_view = QtWidgets.QListView()
         list_view.setWordWrap(True)
         # HACK: The first time the dropdown is rendered, it does not have the right height
-        # Assuming all options take 2 lines (BitBlt which has 1).
+        # Assuming all options take 2 lines (except BitBlt which has 1).
         # And all lines take 16 pixels
         # And all separators take 2 pixels
-        doubled_len = 2 * len(capture_methods)
+        doubled_len = 2 * len(capture_method_values)
         list_view.setMinimumHeight((doubled_len - 1) * 16 + doubled_len)
         list_view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.capture_method_combobox.setView(list_view)
-        self.capture_method_combobox.addItems(capture_methods)
+        self.capture_method_combobox.addItems(capture_list_items)
         self.capture_method_combobox.setToolTip("\n\n".join([
-            f"{method['name']} :\n{method['description']}"
-            for method in CAPTURE_METHODS.values()]))
+            f"{method.name} :\n{method.description}"
+            for method in capture_method_values]))
 # endregion
 
 # region Set initial values
@@ -228,13 +246,13 @@ def get_default_settings_from_ui(autosplit: AutoSplit):
         "pause_hotkey": default_settings_dialog.pause_input.text(),
         "fps_limit": default_settings_dialog.fps_limit_spinbox.value(),
         "live_capture_region": default_settings_dialog.live_capture_region_checkbox.isChecked(),
-        "capture_method": get_capture_method_by_index(0),
+        "capture_method": CAPTURE_METHODS.get_method_by_index(
+            default_settings_dialog.capture_method_combobox.currentIndex()),
         "default_comparison_method": default_settings_dialog.default_comparison_method.currentIndex(),
         "default_similarity_threshold": default_settings_dialog.default_similarity_threshold_spinbox.value(),
         "default_delay_time": default_settings_dialog.default_delay_time_spinbox.value(),
         "default_pause_time": default_settings_dialog.default_pause_time_spinbox.value(),
         "loop_splits": default_settings_dialog.loop_splits_checkbox.isChecked(),
-
         "split_image_directory": autosplit.split_image_folder_input.text(),
         "captured_window_title": "",
         "capture_region": {
@@ -242,7 +260,6 @@ def get_default_settings_from_ui(autosplit: AutoSplit):
             "y": autosplit.y_spinbox.value(),
             "width": autosplit.width_spinbox.value(),
             "height": autosplit.height_spinbox.value(),
-        }
-    }
+        }}
     del temp_dialog
     return default_settings

@@ -1,8 +1,8 @@
 import asyncio
 from collections import OrderedDict
-from enum import Enum, unique
+from dataclasses import dataclass
+from enum import Enum, EnumMeta, unique
 from platform import version
-from typing import TypedDict
 
 from winsdk.windows.media.capture import MediaCapture
 
@@ -14,19 +14,32 @@ def test_for_media_capture():
     async def coroutine():
         return await (MediaCapture().initialize_async() or asyncio.sleep(0))
     try:
-        return bool(asyncio.run(coroutine()))
+        asyncio.run(coroutine())
+        return True
     except OSError:
         return False
 
 
-class CaptureMethodInfo(TypedDict):
+@dataclass
+class DisplayCaptureMethodInfo():
     name: str
     short_description: str
     description: str
 
 
+class CaptureMethodMeta(EnumMeta):
+    # Allow checking if simple string is enum
+    def __contains__(self, other: str):
+        try:
+            self(other)  # pyright: ignore [reportGeneralTypeIssues]
+        except ValueError:
+            return False
+        else:
+            return True
+
+
 @unique
-class CaptureMethod(Enum):
+class CaptureMethod(Enum, metaclass=CaptureMethodMeta):
     # Allow TOML to save as a simple string
     def __repr__(self):
         return self.value
@@ -46,8 +59,13 @@ class CaptureMethod(Enum):
     DESKTOP_DUPLICATION = "DESKTOP_DUPLICATION"
 
 
-CAPTURE_METHODS = OrderedDict({
-    CaptureMethod.BITBLT: CaptureMethodInfo(
+class DisplayCaptureMethodDict(OrderedDict[CaptureMethod, DisplayCaptureMethodInfo]):
+    def get_method_by_index(self, index: int):
+        return list(self.keys())[index]
+
+
+CAPTURE_METHODS = DisplayCaptureMethodDict({
+    CaptureMethod.BITBLT: DisplayCaptureMethodInfo(
         name="BitBlt",
         short_description="fastest, least compatible",
         description=(
@@ -57,7 +75,7 @@ CAPTURE_METHODS = OrderedDict({
             "\nThe smaller the region, the more efficient it is. "
         ),
     ),
-    CaptureMethod.WINDOWS_GRAPHICS_CAPTURE: CaptureMethodInfo(
+    CaptureMethod.WINDOWS_GRAPHICS_CAPTURE: DisplayCaptureMethodInfo(
         name="Windows Graphics Capture",
         short_description="fast, most compatible but less features",
         description=(
@@ -68,7 +86,7 @@ CAPTURE_METHODS = OrderedDict({
             "\nCaps at around 60 FPS. "
         ),
     ),
-    CaptureMethod.DESKTOP_DUPLICATION: CaptureMethodInfo(
+    CaptureMethod.DESKTOP_DUPLICATION: DisplayCaptureMethodInfo(
         name="Direct3D Desktop Duplication",
         short_description="slower, bound to display",
         description=(
@@ -78,7 +96,7 @@ CAPTURE_METHODS = OrderedDict({
             "\noverlapping windows will show up and can't record across displays. "
         ),
     ),
-    CaptureMethod.PRINTWINDOW_RENDERFULLCONTENT: CaptureMethodInfo(
+    CaptureMethod.PRINTWINDOW_RENDERFULLCONTENT: DisplayCaptureMethodInfo(
         name="Force Full Content Rendering",
         short_description="very slow, can affect rendering pipeline",
         description=(
@@ -89,20 +107,6 @@ CAPTURE_METHODS = OrderedDict({
         ),
     ),
 })
-
-
-def get_capture_method_index(capture_method: CaptureMethod):
-    """
-    Returns 0 if the capture_method is invalid or unsupported
-    """
-    try:
-        return list(CAPTURE_METHODS.keys()).index(capture_method)
-    except ValueError:
-        return 0
-
-
-def get_capture_method_by_index(index: int):
-    return list(CAPTURE_METHODS.keys())[index]
 
 
 # Detect and remove unsupported capture methods

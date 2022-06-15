@@ -32,7 +32,7 @@ from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, Ima
 from CaptureMethod import CaptureMethod
 from gen import about, design, settings, update_checker
 from hotkeys import after_setting_hotkey, send_command
-from menu_bar import (VERSION, check_for_updates, get_default_settings_from_ui, open_about, open_settings,
+from menu_bar import (AUTOSPLIT_VERSION, check_for_updates, get_default_settings_from_ui, open_about, open_settings,
                       open_update_checker, view_help)
 from region_capture import capture_region, set_ui_image
 from region_selection import (WindowsGraphicsCapture, align_region, create_windows_graphics_capture, select_region,
@@ -48,7 +48,7 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 
 class AutoSplit(QMainWindow, design.Ui_MainWindow):
-    myappid = f"Toufool.AutoSplit.v{VERSION}"
+    myappid = f"Toufool.AutoSplit.v{AUTOSPLIT_VERSION}"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     # Parse command line args
@@ -104,10 +104,10 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     reset_highest_similarity = 0.0
 
     # Define all other attributes
-    start_image_split_below_threshold: bool
-    waiting_for_split_delay: bool
-    split_below_threshold: bool
-    run_start_time: float
+    start_image_split_below_threshold = False
+    waiting_for_split_delay = False
+    split_below_threshold = False
+    run_start_time = 0.0
     start_image: Optional[AutoSplitImage] = None
     reset_image: Optional[AutoSplitImage] = None
     split_images: list[AutoSplitImage] = []
@@ -121,6 +121,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         sys.excepthook = error_messages.make_excepthook(self)
 
         self.setupUi(self)
+        self.setWindowTitle(f"AutoSplit v{AUTOSPLIT_VERSION}")
 
         # Get default values defined in SettingsDialog
         self.settings_dict = get_default_settings_from_ui(self)
@@ -146,7 +147,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
 
             # Send version and process ID to stdout
             # THIS HAS TO BE THE FIRST TWO LINES SENT
-            print(f"{VERSION}\n{os.getpid()}", flush=True)
+            print(f"{AUTOSPLIT_VERSION}\n{os.getpid()}", flush=True)
 
             # Use and Start the thread that checks for updates from LiveSplit
             self.update_auto_control = QtCore.QThread()
@@ -229,14 +230,15 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.load_start_image_signal.emit()
 
     def __live_image_function(self):
-        self.capture_region_window_label.setText(self.settings_dict["captured_window_title"])
-        if not (self.settings_dict["live_capture_region"] and self.settings_dict["captured_window_title"]):
+        capture_region_window_label = self.settings_dict["captured_window_title"]
+        self.capture_region_window_label.setText(capture_region_window_label)
+        if not (self.settings_dict["live_capture_region"] and capture_region_window_label):
             self.live_image.clear()
             return
         # Set live image in UI
-        if self.hwnd or self.windows_graphics_capture:
-            capture, _ = capture_region(self)
-            set_ui_image(self.live_image, capture, False)
+        # if self.hwnd or self.windows_graphics_capture:
+        capture, _ = capture_region(self)
+        set_ui_image(self.live_image, capture, False)
 
     def __load_start_image(self, started_by_button: bool = False, wait_for_delay: bool = True):
         """
@@ -292,16 +294,13 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         capture, _ = self.__get_capture_for_comparison()
         start_image_threshold = self.start_image.get_similarity_threshold(self)
         start_image_similarity = self.start_image.compare_with_capture(self, capture)
-        self.table_current_image_threshold_label.setText(f"{start_image_threshold:.2f}")
-
-        # Show live similarity if the checkbox is checked
-        self.table_current_image_live_label.setText(f"{start_image_similarity:.2f}")
 
         # If the similarity becomes higher than highest similarity, set it as such.
         if start_image_similarity > self.highest_similarity:
             self.highest_similarity = start_image_similarity
 
-        # Show live highest similarity if the checkbox is checked
+        self.table_current_image_threshold_label.setText(f"{start_image_threshold:.2f}")
+        self.table_current_image_live_label.setText(f"{start_image_similarity:.2f}")
         self.table_current_image_highest_label.setText(f"{self.highest_similarity:.2f}")
 
         # If the {b} flag is set, let similarity go above threshold first, then split on similarity below threshold
@@ -309,7 +308,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         below_flag = self.start_image.check_flag(BELOW_FLAG)
 
         # Negative means belove threshold, positive means above
-        similarity_diff = start_image_threshold - start_image_similarity
+        similarity_diff = start_image_similarity - start_image_threshold
         if below_flag \
                 and not self.start_image_split_below_threshold \
                 and similarity_diff >= 0:
@@ -741,7 +740,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
         capture, is_old_image = capture_region(self)
 
-        # This most likely means we lost capture (ie the captured window was closed, crashed, etc.)
+        # This most likely means we lost capture
+        # (ie the captured window was closed, crashed, lost capture device, etc.)
         if capture is None or not capture.size:
             # Try to recover by using the window name
             self.live_image.setText("Trying to recover window...")
@@ -750,28 +750,42 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             if hwnd:
                 self.hwnd = hwnd
                 if self.settings_dict["capture_method"] == CaptureMethod.WINDOWS_GRAPHICS_CAPTURE:
-                    self.windows_graphics_capture = create_windows_graphics_capture(create_for_window(hwnd))
+                    if self.windows_graphics_capture:
+                        self.windows_graphics_capture.close()
+                    try:
+                        self.windows_graphics_capture = create_windows_graphics_capture(create_for_window(hwnd))
+                    # Unrecordable hwnd found as the game is crashing
+                    except OSError as exception:
+                        if str(exception).endswith("The parameter is incorrect"):
+                            return None, is_old_image
+                        raise
                 capture, _ = capture_region(self)
-        return None if capture is None or not capture.size else cv2.resize(
-            capture, COMPARISON_RESIZE, interpolation=cv2.INTER_NEAREST), is_old_image
 
-    def __reset_if_should(self, capture: Optional[cv2.ndarray]):
+        return (None
+                if capture is None or not capture.size
+                else cv2.resize(capture, COMPARISON_RESIZE, interpolation=cv2.INTER_NEAREST),
+                is_old_image)
+
+    def __reset_if_should(self, capture: Optional[cv2.Mat]):
         """
-        Check if we should reset, resets if it's the case, and returns the result
+        Checks if we should reset, resets if it's the case, and returns the result
         """
         if self.reset_image:
             similarity = self.reset_image.compare_with_capture(self, capture)
             threshold = self.reset_image.get_similarity_threshold(self)
 
-            if similarity > self.reset_highest_similarity:
-                self.reset_highest_similarity = similarity
+            paused = time() - self.run_start_time <= self.reset_image.get_pause_time(self)
+            if paused:
+                should_reset = False
+                self.table_reset_image_live_label.setText("paused")
+            else:
+                should_reset = similarity >= threshold
+                if similarity > self.reset_highest_similarity:
+                    self.reset_highest_similarity = similarity
+                self.table_reset_image_highest_label.setText(f"{self.reset_highest_similarity:.2f}")
+                self.table_reset_image_live_label.setText(f"{similarity:.2f}")
 
-            self.table_reset_image_live_label.setText(f"{similarity:.2f}")
-            self.table_reset_image_highest_label.setText(f"{self.reset_highest_similarity:.2f}")
             self.table_reset_image_threshold_label.setText(f"{threshold:.2f}")
-
-            should_reset = similarity >= threshold \
-                and time() - self.run_start_time > self.reset_image.get_pause_time(self)
 
             if should_reset:
                 send_command(self, "reset")
