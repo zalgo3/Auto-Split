@@ -894,6 +894,35 @@
      <string>&gt;</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="disable_auto_reset_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>360</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="disable_auto_reset_label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>360</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Disable auto reset image </string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
    <zorder>x_label</zorder>
    <zorder>select_region_button</zorder>
    <zorder>start_auto_splitter_button</zorder>
@@ -930,6 +959,8 @@
    <zorder>image_loop_value_label</zorder>
    <zorder>previous_image_button</zorder>
    <zorder>next_image_button</zorder>
+   <zorder>disable_auto_reset_label</zorder>
+   <zorder>disable_auto_reset_checkbox</zorder>
   </widget>
   <widget class="QMenuBar" name="menu_bar">
    <property name="geometry">

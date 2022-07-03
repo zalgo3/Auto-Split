@@ -783,7 +783,9 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
         Checks if we should reset, resets if it's the case, and returns the result
         """
-        if self.reset_image:
+        if self.disable_auto_reset_checkbox.isChecked():
+            self.table_reset_image_live_label.setText("disabled")
+        elif self.reset_image:
             similarity = self.reset_image.compare_with_capture(self, capture)
             threshold = self.reset_image.get_similarity_threshold(self)
 
