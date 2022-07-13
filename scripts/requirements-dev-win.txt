@@ -1,0 +1,11 @@
+# Usage: .\scripts\install.bat
+#
+# If you're having issues with the libraries, you might want to first run:
+# pip uninstall -y -r .\scripts\requirements-dev-win.txt
+#
+# Dependencies
+-r requirements-dev.txt
+-r requirements-win.txt
+#
+# Windows-only types-stubs
+pywin32-stubs>=0.1.6

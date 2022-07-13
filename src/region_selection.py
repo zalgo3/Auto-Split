@@ -10,14 +10,17 @@ import cv2
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
-from win32 import win32gui
-from win32con import GA_ROOT, MAXBYTE, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
-from winsdk._winrt import initialize_with_window
-from winsdk.windows.foundation import AsyncStatus, IAsyncOperation
-from winsdk.windows.graphics.capture import GraphicsCaptureItem, GraphicsCapturePicker
 
 import error_messages
-from utils import get_window_bounds, is_valid_image
+from utils import IS_WINDOWS, MAXBYTE, get_window_bounds, is_valid_image
+
+if IS_WINDOWS:
+    from win32 import win32gui
+    from win32con import GA_ROOT, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
+    from winsdk._winrt import initialize_with_window
+    from winsdk.windows.foundation import AsyncStatus, IAsyncOperation
+    from winsdk.windows.graphics.capture import GraphicsCaptureItem, GraphicsCapturePicker
+    user32 = ctypes.windll.user32
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -41,8 +44,6 @@ IMREAD_EXT_FILTER = "All Files (" \
     + " ".join([f"{extensions}" for _, extensions in SUPPORTED_IMREAD_FORMATS]) \
     + ");;"\
     + ";;".join([f"{format} ({extensions})" for format, extensions in SUPPORTED_IMREAD_FORMATS])
-
-user32 = ctypes.windll.user32
 
 
 def __select_graphics_item(autosplit: AutoSplit):  # pyright: ignore [reportUnusedFunction]

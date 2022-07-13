@@ -3,7 +3,12 @@ If ($IsLinux) {
 }
 
 python -m pip install wheel --upgrade
-python -m pip install -r "$PSScriptRoot/requirements-dev.txt"
+If ($IsWindows) {
+  python -m pip install -r "$PSScriptRoot/requirements-dev-win.txt"
+}
+Else {
+  python -m pip install -r "$PSScriptRoot/requirements-dev.txt"
+}
 & "$PSScriptRoot/compile_resources.ps1"
 npm install -g pyright@latest
 npm list -g pyright

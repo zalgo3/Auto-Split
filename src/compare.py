@@ -7,9 +7,8 @@ import cv2
 import imagehash  # https://github.com/JohannesBuchner/imagehash/issues/151
 import numpy as np
 from PIL import Image
-from win32con import MAXBYTE
 
-from utils import is_valid_image
+from utils import MAXBYTE, is_valid_image
 
 MAXRANGE = MAXBYTE + 1
 CHANNELS = [0, 1, 2]

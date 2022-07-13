@@ -5,11 +5,16 @@ import os
 import sys
 from collections.abc import Callable
 from platform import version
+from sys import platform
 from typing import Any, Optional, Union, cast
 
 import cv2
 from typing_extensions import TypeGuard
-from win32 import win32gui
+
+IS_WINDOWS = platform.startswith("win")
+IS_LINUX = platform.startswith("linux")
+if IS_WINDOWS:
+    from win32 import win32gui
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
@@ -58,14 +63,15 @@ def fire_and_forget(func: Callable[..., None]):
 
 
 # Environment specifics
-WINDOWS_BUILD_NUMBER = int(version().split(".")[2])
+WINDOWS_BUILD_NUMBER = int(version().split(".")[2]) if platform == "win32" else -1
 FIRST_WIN_11_BUILD = 22000
 """AutoSplit Version number"""
 FROZEN = hasattr(sys, "frozen")
 """Running from build made by PyInstaller"""
 auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
-"""The directory of either AutoSplit.exe or AutoSplit.py"""
+"""The directory of either the AutoSplit executable or AutoSplit.py"""
 
-# Shared strings
+# Shared values
 AUTOSPLIT_VERSION = "2.0.0-alpha.4"
 START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
+MAXBYTE = 255
