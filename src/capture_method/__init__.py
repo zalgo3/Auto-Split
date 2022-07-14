@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, TypedDict
 import cv2
 
 from capture_method.interface import CaptureMethodInterface
+from capture_method.PyAutoGUICaptureMethod import PyAutoGUICaptureMethod
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
 from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER
 
@@ -74,6 +75,7 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     WINDOWS_GRAPHICS_CAPTURE = "WINDOWS_GRAPHICS_CAPTURE"
     PRINTWINDOW_RENDERFULLCONTENT = "PRINTWINDOW_RENDERFULLCONTENT"
     DESKTOP_DUPLICATION = "DESKTOP_DUPLICATION"
+    PY_AUTO_GUI = "PY_AUTO_GUI"
     VIDEO_CAPTURE_DEVICE = "VIDEO_CAPTURE_DEVICE"
 
 
@@ -147,7 +149,15 @@ if IS_WINDOWS:
         implementation=ForceFullContentRenderingCaptureMethod,
     )
 elif IS_LINUX:
-    pass
+    CAPTURE_METHODS[CaptureMethodEnum.PY_AUTO_GUI] = CaptureMethodInfo(
+        name="PyAutoGUI",
+        short_description="screenshots using PyAutoGUI",
+        description=(
+            "\nUses PyAutoGUI to take screenshots "
+            "\n\"scrot\" must be installed to use screenshot functions in Linux. Run: sudo apt-get install scrot"
+        ),
+        implementation=PyAutoGUICaptureMethod,
+    )
 
 CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
     name="Video Capture Device",

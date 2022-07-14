@@ -37,11 +37,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-dev.txt'
+          cache-dependency-path: 'scripts/requirements-win-dev.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
         run: |
-          pip install -r "scripts/requirements-dev.txt"
+          pip install -r "scripts/requirements-win-dev.txt"
           npm install -g pyright
           npm list -g pyright
       - run: scripts/compile_resources.ps1
@@ -61,10 +61,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-dev.txt'
+          cache-dependency-path: 'scripts/requirements-win-dev.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-dev.txt"
+        run: pip install -r "scripts/requirements-win-dev.txt"
       - run: scripts/compile_resources.ps1
       - name: Analysing the code with Pylint
         run: pylint --reports=y --output-format=colorized src/
@@ -82,10 +82,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-dev.txt'
+          cache-dependency-path: 'scripts/requirements-win-dev.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-dev.txt"
+        run: pip install -r "scripts/requirements-win-dev.txt"
       - run: scripts/compile_resources.ps1
       - name: Analysing the code with Flake8
         run: flake8
@@ -103,10 +103,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-dev.txt'
+          cache-dependency-path: 'scripts/requirements-win-dev.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-dev.txt"
+        run: pip install -r "scripts/requirements-win-dev.txt"
       - run: scripts/compile_resources.ps1
       - name: Analysing the code with Bandit
         run: bandit -n 1 --severity-level medium --recursive src
@@ -126,7 +126,7 @@ jobs:
           cache: 'pip'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements.txt"
+        run: pip install -r "scripts/requirements-win.txt"
       - run: scripts/build.ps1
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3

@@ -29,7 +29,7 @@ from menu_bar import (check_for_updates, get_default_settings_from_ui, open_abou
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from user_profile import DEFAULT_PROFILE
-from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, IS_WINDOWS, START_AUTO_SPLITTER_TEXT,
+from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, IS_LINUX, IS_WINDOWS, START_AUTO_SPLITTER_TEXT,
                    WINDOWS_BUILD_NUMBER, auto_split_directory, decimal, is_valid_image)
 
 CHECK_FPS_ITERATIONS = 10
@@ -241,7 +241,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             if self.settings_dict["capture_method"] == CaptureMethodEnum.VIDEO_CAPTURE_DEVICE \
             else self.settings_dict["captured_window_title"]
         self.capture_region_window_label.setText(capture_region_window_label)
-        if not (self.settings_dict["live_capture_region"] and capture_region_window_label):
+        if not IS_LINUX and not (self.settings_dict["live_capture_region"] and capture_region_window_label):
             self.live_image.clear()
             return
         # Set live image in UI

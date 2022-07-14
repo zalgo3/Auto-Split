@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Union
 import keyboard
 import pyautogui
 
-from utils import START_AUTO_SPLITTER_TEXT, is_digit
+from utils import IS_LINUX, START_AUTO_SPLITTER_TEXT, is_digit
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -222,24 +222,25 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
 
         __remove_key_already_set(autosplit, hotkey_name)
 
-        action = __get_hotkey_action(autosplit, hotkey)
-        setattr(
-            autosplit,
-            f"{hotkey}_hotkey",
-            # keyboard.add_hotkey doesn't give the last keyboard event, so we can't __validate_keypad.
-            # This means "ctrl + num 5" and "ctrl + 5" will both be registered.
-            # For that reason, we still prefer keyboard.hook_key for single keys.
-            # keyboard module allows you to hit multiple keys for a hotkey. they are joined together by +.
-            keyboard.add_hotkey(hotkey_name, action)
-            if "+" in hotkey_name
-            # We need to inspect the event to know if it comes from numpad because of _canonial_names.
-            # See: https://github.com/boppreh/keyboard/issues/161#issuecomment-386825737
-            # The best way to achieve this is make our own hotkey handling on top of hook
-            # See: https://github.com/boppreh/keyboard/issues/216#issuecomment-431999553
-            else keyboard.hook_key(
-                hotkey_name,
-                lambda keyboard_event: _hotkey_action(keyboard_event, hotkey_name, action))
-        )
+        if not IS_LINUX:
+            action = __get_hotkey_action(autosplit, hotkey)
+            setattr(
+                autosplit,
+                f"{hotkey}_hotkey",
+                # keyboard.add_hotkey doesn't give the last keyboard event, so we can't __validate_keypad.
+                # This means "ctrl + num 5" and "ctrl + 5" will both be registered.
+                # For that reason, we still prefer keyboard.hook_key for single keys.
+                # keyboard module allows you to hit multiple keys for a hotkey. they are joined together by +.
+                keyboard.add_hotkey(hotkey_name, action)
+                if "+" in hotkey_name
+                # We need to inspect the event to know if it comes from numpad because of _canonial_names.
+                # See: https://github.com/boppreh/keyboard/issues/161#issuecomment-386825737
+                # The best way to achieve this is make our own hotkey handling on top of hook
+                # See: https://github.com/boppreh/keyboard/issues/216#issuecomment-431999553
+                else keyboard.hook_key(
+                    hotkey_name,
+                    lambda keyboard_event: _hotkey_action(keyboard_event, hotkey_name, action))
+            )
 
         if autosplit.SettingsWidget:
             getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)
