@@ -824,6 +824,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         def exit_program():
             if self.update_auto_control:
                 self.update_auto_control.terminate()
+            self.capture_method.close(self)
             if a0 is not None:
                 a0.accept()
             if self.is_auto_controlled:

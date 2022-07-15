@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 import cv2
 
+from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
 from capture_method.interface import CaptureMethodInterface
 from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
@@ -76,6 +77,8 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     PRINTWINDOW_RENDERFULLCONTENT = "PRINTWINDOW_RENDERFULLCONTENT"
     DESKTOP_DUPLICATION = "DESKTOP_DUPLICATION"
     SCROT = "SCROT"
+    XDISPLAY = "XDISPLAY"
+    GNOME_SCREENSHOT = "GNOME_SCREENSHOT"
     VIDEO_CAPTURE_DEVICE = "VIDEO_CAPTURE_DEVICE"
 
 
@@ -152,13 +155,35 @@ if IS_WINDOWS:
         implementation=ForceFullContentRenderingCaptureMethod,
     )
 elif IS_LINUX:
+    # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
+    SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
+    CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
+        name="XDisplay",
+        short_description=SCREENSHOT_SHORT_DESCRIPTION,
+        description=(
+            "\nUses XDisplay to take screenshots "
+        ),
+        implementation=GnomeScreenshotCaptureMethod,
+    )
+    CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
+        name="gnome-screenshot",
+        short_description=SCREENSHOT_SHORT_DESCRIPTION,
+        description=(
+            "\nUses gnome-screenshot to take screenshots. "
+        ),
+        implementation=GnomeScreenshotCaptureMethod,
+    )
     CAPTURE_METHODS[CaptureMethodEnum.SCROT] = CaptureMethodInfo(
         name="Scrot",
-        short_description="screenshots using Scrot ",
+        short_description=SCREENSHOT_SHORT_DESCRIPTION,
         description=(
             "\nUses Scrot (SCReenshOT) to take screenshots. "
             "\nLeaves behind a screenshot file if interrupted. "
-            "\n\"scrot\" must be installed to use screenshot functions in Linux. Run: sudo apt-get install scrot"
+            "\n\n----------------------------------------------------\n"
+            "\nNo screenshot utilities used here are compatible with Wayland. Follow this guide to disable it: "
+            "\nhttps://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop"
+            '\n"scrot" must be installed to use screenshot functions in Linux. '
+            "\nRun: sudo apt-get install scrot"
         ),
         implementation=ScrotCaptureMethod,
     )
@@ -201,10 +226,13 @@ def get_input_devices() -> list[str]:
         return FilterGraph().get_input_devices()
     if IS_LINUX:
         cameras: list[str] = []
-        for index in range(len(os.listdir("/sys/class/video4linux"))):
-            with open(f"/sys/class/video4linux/video{index}/name", "r", encoding="utf-8") as file:
-                cameras.append(file.readline()[:-2])
-        return cameras
+        try:
+            for index in range(len(os.listdir("/sys/class/video4linux"))):
+                with open(f"/sys/class/video4linux/video{index}/name", "r", encoding="utf-8") as file:
+                    cameras.append(file.readline()[:-2])
+            return cameras
+        except FileNotFoundError:
+            return []
     return []
 
 
