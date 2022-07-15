@@ -6,7 +6,6 @@ import ctypes
 import os
 import signal
 import sys
-from collections.abc import Callable
 from time import time
 from types import FunctionType
 from typing import Optional

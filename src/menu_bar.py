@@ -279,6 +279,7 @@ def get_default_settings_from_ui(autosplit: AutoSplit):
         "undo_split_hotkey": default_settings_dialog.undo_split_input.text(),
         "skip_split_hotkey": default_settings_dialog.skip_split_input.text(),
         "pause_hotkey": default_settings_dialog.pause_input.text(),
+        "disable_auto_reset_image_hotkey": default_settings_dialog.disable_auto_reset_image_input.text(),
         "fps_limit": default_settings_dialog.fps_limit_spinbox.value(),
         "live_capture_region": default_settings_dialog.live_capture_region_checkbox.isChecked(),
         "capture_method": CAPTURE_METHODS.get_method_by_index(
