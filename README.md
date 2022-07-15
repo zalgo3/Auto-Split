@@ -6,7 +6,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Avasam_Auto-Split&metric=security_rating)](https://sonarcloud.io/dashboard?id=Avasam_Auto-Split)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Avasam_Auto-Split&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Avasam_Auto-Split)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Avasam_Auto-Split&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Avasam_Auto-Split)
-[![SemVer](https://badgen.net/badge/SemVer/SemVer/grey?label)](https://semver.org/)
+[![SemVer](https://badgen.net/badge/_/SemVer%20compliant/grey?label)](https://semver.org/)
 
 Easy to use image comparison based auto splitter for speedrunning on console or PC.
 
@@ -190,13 +190,6 @@ You can have one (and only one) image with the keyword `reset` in its name. Auto
 
 The start image is similar to the reset image. You can only have one start image with the keyword `start_auto_splitter`.You can reload the image using the "`Reload Start Image`" button. The pause time is the amount of seconds AutoSplit will wait before checking for the start image once a run ends/is reset. Delay times will be used to delay starting your timer after the threshold is met. If you need to pause comparison for any amount of time after the Start Image, the best option right now is to use a dummy split image `{d}` with a similarity threshold of `(0.00)` and a pause threshold `[]` of however long you need to pause comparison as your first split image. This will trigger the pause immediately after your timer is started.
 
-### Profiles
-
-- Profiles are saved under `%appdata%\AutoSplit\profiles` and use the extension `.toml`. Profiles can be saved and loaded by using File -> Save Profile As... and File -> Load Profile.
-- The profile contains all of your settings, including information about the capture region.
-- You can save multiple profiles, which is useful if you speedrun multiple games.
-- If you change your display setup (like using a new monitor, or upgrading to Windows 11), you may need to readjust or reselect your Capture Region.
-
 ## Timer Integration
 
 ### Timer Global Hotkeys
@@ -240,7 +233,7 @@ Still need help?
 - Created by [Toufool](https://twitter.com/Toufool) and [Faschz](https://twitter.com/faschz).
 - [Harutaka Kawamura](https://github.com/harupy/) for the snipping tool code that I used to integrate into the autosplitter.
 - [amaringos](https://twitter.com/amaringos) for the icon.
-- [ZanasoBayncuh](https://twitter.com/ZanasoBayncuh) for motivating me to start this project back up and for all of the time spent testing and suggesting improvements.
+- [Zana_G](https://www.twitch.tv/zana_g) for motivating me to start this project back up and for all of the time spent testing and suggesting improvements.
 - [Avasam](https://twitter.com/Avasam06) for their continued work on making an incredible amount of improvements and changes to AutoSplit while I have not had the time/motivation to do so.
 - [KaDiWa](https://github.com/KaDiWa4) for the LiveSplit integration.
 - [Tyron18](https://twitter.com/Tyron18_) for assisting with Windows 11 testing.
