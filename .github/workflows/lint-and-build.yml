@@ -38,12 +38,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements-dev.txt'
+      - run: pip install wheel --upgrade
       - name: Install dependencies
         run: |
           pip install -r "scripts/requirements-dev.txt"
           npm install -g pyright
           npm list -g pyright
-      - run: scripts/compile_resources.bat
+      - run: scripts/compile_resources.ps1
       - name: Analysing the code with Pyright
         run: pyright --warnings
   Pylint:
@@ -61,9 +62,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements-dev.txt'
+      - run: pip install wheel --upgrade
       - name: Install dependencies
         run: pip install -r "scripts/requirements-dev.txt"
-      - run: scripts/compile_resources.bat
+      - run: scripts/compile_resources.ps1
       - name: Analysing the code with Pylint
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
@@ -81,9 +83,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements-dev.txt'
+      - run: pip install wheel --upgrade
       - name: Install dependencies
         run: pip install -r "scripts/requirements-dev.txt"
-      - run: scripts/compile_resources.bat
+      - run: scripts/compile_resources.ps1
       - name: Analysing the code with Flake8
         run: flake8
   Bandit:
@@ -101,9 +104,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements-dev.txt'
+      - run: pip install wheel --upgrade
       - name: Install dependencies
         run: pip install -r "scripts/requirements-dev.txt"
-      - run: scripts/compile_resources.bat
+      - run: scripts/compile_resources.ps1
       - name: Analysing the code with Bandit
         run: bandit -n 1 --severity-level medium --recursive src
   Build:
@@ -120,9 +124,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+      - run: pip install wheel --upgrade
       - name: Install dependencies
         run: pip install -r "scripts/requirements.txt"
-      - run: scripts/build.bat
+      - run: scripts/build.ps1
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
