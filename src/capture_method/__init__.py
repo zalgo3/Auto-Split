@@ -8,11 +8,13 @@ from enum import Enum, EnumMeta, unique
 from typing import TYPE_CHECKING, TypedDict
 
 import cv2
+import pyscreeze
 
 from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
 from capture_method.interface import CaptureMethodInterface
 from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
+from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER, first
 
 if IS_WINDOWS:
@@ -155,42 +157,52 @@ if IS_WINDOWS:
         implementation=ForceFullContentRenderingCaptureMethod,
     )
 elif IS_LINUX:
+    def test_scrot():
+        try:
+            pyscreeze.screenshot()
+            return True
+        except NotImplementedError:
+            return False
+
     # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
     SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
     CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
         name="XDisplay",
-        short_description=SCREENSHOT_SHORT_DESCRIPTION,
+        short_description="fast",
         description=(
             "\nUses XDisplay to take screenshots "
         ),
-        implementation=GnomeScreenshotCaptureMethod,
+        implementation=XDisplayCaptureMethod,
     )
     CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
         name="gnome-screenshot",
-        short_description=SCREENSHOT_SHORT_DESCRIPTION,
+        short_description="fast, Gnome only",
         description=(
             "\nUses gnome-screenshot to take screenshots. "
         ),
         implementation=GnomeScreenshotCaptureMethod,
     )
-    CAPTURE_METHODS[CaptureMethodEnum.SCROT] = CaptureMethodInfo(
-        name="Scrot",
-        short_description=SCREENSHOT_SHORT_DESCRIPTION,
-        description=(
-            "\nUses Scrot (SCReenshOT) to take screenshots. "
-            "\nLeaves behind a screenshot file if interrupted. "
-            "\n\n----------------------------------------------------\n"
-            "\nNo screenshot utilities used here are compatible with Wayland. Follow this guide to disable it: "
-            "\nhttps://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop"
-            '\n"scrot" must be installed to use screenshot functions in Linux. '
-            "\nRun: sudo apt-get install scrot"
-        ),
-        implementation=ScrotCaptureMethod,
-    )
+    if test_scrot():
+        # TODO: Investigate solution for Slow Scrot:
+        # https://github.com/asweigart/pyscreeze/issues/68
+        CAPTURE_METHODS[CaptureMethodEnum.SCROT] = CaptureMethodInfo(
+            name="Scrot",
+            short_description="very slow, leaves file artefacts",
+            description=(
+                "\nUses Scrot (SCReenshOT) to take screenshots. "
+                "\nLeaves behind a screenshot file if interrupted. "
+                "\n\n----------------------------------------------------\n"
+                "\nNo screenshot utilities used here are compatible with Wayland. Follow this guide to disable it: "
+                "\nhttps://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop"
+                '\n"scrot" must be installed to use screenshot functions in Linux. '
+                "\nRun: sudo apt-get install scrot"
+            ),
+            implementation=ScrotCaptureMethod,
+        )
 
 CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
     name="Video Capture Device",
-    short_description="very slow, see below",
+    short_description="see below",
     description=(
         "\nUses a Video Capture Device, like a webcam, virtual cam, or capture card. "
         "\nYou can select one below. "
