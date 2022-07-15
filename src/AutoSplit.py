@@ -68,14 +68,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     CheckForUpdatesThread: Optional[QtCore.QThread] = None
     SettingsWidget: Optional[settings.Ui_DialogSettings] = None
 
-    # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
-    # and for type safety in both hotkeys.py and settings_file.py
-    split_hotkey: Optional[Callable[[], None]] = None
-    reset_hotkey: Optional[Callable[[], None]] = None
-    skip_split_hotkey: Optional[Callable[[], None]] = None
-    undo_split_hotkey: Optional[Callable[[], None]] = None
-    pause_hotkey: Optional[Callable[[], None]] = None
-
     # Initialize a few attributes
     hwnd = 0
     """Window Handle used for Capture Region"""
@@ -123,6 +115,10 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.y_spinbox.setFrame(False)
             self.width_spinbox.setFrame(False)
             self.height_spinbox.setFrame(False)
+
+        # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
+        for hotkey in HOTKEYS:
+            setattr(self, f"{hotkey}_hotkey", None)
 
         # Get default values defined in SettingsDialog
         self.settings_dict = get_default_settings_from_ui(self)
