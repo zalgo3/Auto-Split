@@ -19,12 +19,12 @@ class VideoCaptureDeviceCaptureMethod(ThreadedCaptureMethod):
         return image if result else None
 
     def __init__(self, autosplit: AutoSplit):
-        super().__init__(autosplit)
         self.capture_device = cv2.VideoCapture(autosplit.settings_dict["capture_device_id"])
         self.capture_device.setExceptionMode(True)
+        super().__init__(autosplit)
 
-    def close(self, autosplit: AutoSplit):
-        super().close(autosplit)
+    def close(self, autosplit: AutoSplit, from_exception: bool = False):
+        super().close(autosplit, from_exception)
         self.capture_device.release()
 
     def get_frame(self, autosplit: AutoSplit):

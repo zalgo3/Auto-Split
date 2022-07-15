@@ -30,7 +30,6 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
     last_captured_frame: Optional[cv2.Mat] = None
 
     def __init__(self, autosplit: AutoSplit):
-        super().__init__(autosplit)
         if not self.check_selected_region_exists(autosplit):
             return
         # Note: Must create in the same thread (can't use a global) otherwise when ran from LiveSplit it will raise:
@@ -63,7 +62,9 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
         self.size = item.size
         self.frame_pool = frame_pool
 
-    def close(self, autosplit: AutoSplit):
+        super().__init__()
+
+    def close(self, autosplit: AutoSplit, from_exception: bool = False):
         if self.frame_pool:
             self.frame_pool.close()
             self.frame_pool = None
