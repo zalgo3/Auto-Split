@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Union
 import keyboard
 import pyautogui
 
-from utils import IS_LINUX, START_AUTO_SPLITTER_TEXT, is_digit
+from utils import FROZEN, START_AUTO_SPLITTER_TEXT, is_digit
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -222,7 +222,7 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
 
         __remove_key_already_set(autosplit, hotkey_name)
 
-        if not IS_LINUX:
+        try:
             action = __get_hotkey_action(autosplit, hotkey)
             setattr(
                 autosplit,
@@ -241,6 +241,11 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
                     hotkey_name,
                     lambda keyboard_event: _hotkey_action(keyboard_event, hotkey_name, action))
             )
+        except ImportError as error:
+            if not FROZEN:
+                print(error)
+            else:
+                raise
 
         if autosplit.SettingsWidget:
             getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)

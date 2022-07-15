@@ -11,7 +11,7 @@ import error_messages
 from capture_method import CAPTURE_METHODS, CaptureMethodEnum, Region, change_capture_method
 from gen import design
 from hotkeys import HOTKEYS, set_hotkey
-from utils import auto_split_directory
+from utils import FROZEN, auto_split_directory
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -130,7 +130,10 @@ def __load_settings_from_file(autosplit: AutoSplit, load_settings_file_path: str
     try:
         keyboard.unhook_all()
     except ImportError as error:
-        print(error)
+        if not FROZEN:
+            print(error)
+        else:
+            raise
     if not autosplit.is_auto_controlled:
         for hotkey, hotkey_name in [(hotkey, f"{hotkey}_hotkey") for hotkey in HOTKEYS]:
             if autosplit.settings_dict[hotkey_name]:

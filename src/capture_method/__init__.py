@@ -10,9 +10,9 @@ from typing import TYPE_CHECKING, TypedDict
 import cv2
 
 from capture_method.interface import CaptureMethodInterface
-from capture_method.PyAutoGUICaptureMethod import PyAutoGUICaptureMethod
+from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
-from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER
+from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER, first
 
 if IS_WINDOWS:
     from pygrabber.dshow_graph import FilterGraph
@@ -75,15 +75,18 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     WINDOWS_GRAPHICS_CAPTURE = "WINDOWS_GRAPHICS_CAPTURE"
     PRINTWINDOW_RENDERFULLCONTENT = "PRINTWINDOW_RENDERFULLCONTENT"
     DESKTOP_DUPLICATION = "DESKTOP_DUPLICATION"
-    PY_AUTO_GUI = "PY_AUTO_GUI"
+    SCROT = "SCROT"
     VIDEO_CAPTURE_DEVICE = "VIDEO_CAPTURE_DEVICE"
 
 
 class CaptureMethodDict(OrderedDict[CaptureMethodEnum, CaptureMethodInfo]):
     def get_method_by_index(self, index: int):
         if index < 0:
-            return next(iter(self))
+            return first(self)
         return list(self.keys())[index]
+
+    def get(self, __key: CaptureMethodEnum):
+        return super().get(__key, first(self.values()))
 
 
 CAPTURE_METHODS = CaptureMethodDict()
@@ -142,21 +145,22 @@ if IS_WINDOWS:
         short_description="very slow, can affect rendering pipeline",
         description=(
             "\nUses BitBlt behind the scene, but passes a special flag "
-             "\nto PrintWindow to force rendering the entire desktop. "
+            "\nto PrintWindow to force rendering the entire desktop. "
             "\nAbout 10-15x slower than BitBlt based on original window size "
             "\nand can mess up some applications' rendering pipelines. "
         ),
         implementation=ForceFullContentRenderingCaptureMethod,
     )
 elif IS_LINUX:
-    CAPTURE_METHODS[CaptureMethodEnum.PY_AUTO_GUI] = CaptureMethodInfo(
-        name="PyAutoGUI",
-        short_description="screenshots using PyAutoGUI",
+    CAPTURE_METHODS[CaptureMethodEnum.SCROT] = CaptureMethodInfo(
+        name="Scrot",
+        short_description="screenshots using Scrot ",
         description=(
-            "\nUses PyAutoGUI to take screenshots "
+            "\nUses Scrot (SCReenshOT) to take screenshots. "
+            "\nLeaves behind a screenshot file if interrupted. "
             "\n\"scrot\" must be installed to use screenshot functions in Linux. Run: sudo apt-get install scrot"
         ),
-        implementation=PyAutoGUICaptureMethod,
+        implementation=ScrotCaptureMethod,
     )
 
 CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
@@ -175,7 +179,7 @@ CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
 
 def change_capture_method(selected_capture_method: CaptureMethodEnum, autosplit: AutoSplit):
     autosplit.capture_method.close(autosplit)
-    autosplit.capture_method = CAPTURE_METHODS[selected_capture_method].implementation(autosplit)
+    autosplit.capture_method = CAPTURE_METHODS.get(selected_capture_method).implementation(autosplit)
     if selected_capture_method == CaptureMethodEnum.VIDEO_CAPTURE_DEVICE:
         autosplit.select_region_button.setDisabled(True)
         autosplit.select_window_button.setDisabled(True)
@@ -204,7 +208,7 @@ def get_input_devices() -> list[str]:
     return []
 
 
-async def get_all_video_capture_devices():
+async def get_all_video_capture_devices() -> list[CameraInfo]:
     named_video_inputs = get_input_devices()
 
     async def get_camera_info(index: int, device_name: str):
