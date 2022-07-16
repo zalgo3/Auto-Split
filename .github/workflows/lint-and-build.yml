@@ -69,11 +69,12 @@ jobs:
       - name: Analysing the code with Pylint
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [windows-latest, ubuntu-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -90,11 +91,12 @@ jobs:
       - name: Analysing the code with Flake8
         run: flake8
   Bandit:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [windows-latest, ubuntu-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -111,11 +113,12 @@ jobs:
       - name: Analysing the code with Bandit
         run: bandit -n 1 --severity-level medium --recursive src
   Build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [windows-latest, ubuntu-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -131,5 +134,5 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: AutoSplit (Python ${{ matrix.python-version }})
-          path: dist/AutoSplit.exe
+          name: AutoSplit for ${{ matrix.os }} (Python ${{ matrix.python-version }})
+          path: dist/AutoSplit.*

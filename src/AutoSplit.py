@@ -30,7 +30,7 @@ from region_selection import align_region, select_region, select_window, validat
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from user_profile import DEFAULT_PROFILE
 from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, IS_LINUX, IS_WINDOWS, START_AUTO_SPLITTER_TEXT,
-                   WINDOWS_BUILD_NUMBER, auto_split_directory, decimal, is_valid_image)
+                   WINDOWS_BUILD_NUMBER, auto_split_directory, decimal, is_valid_image, open_file)
 
 CHECK_FPS_ITERATIONS = 10
 
@@ -123,6 +123,16 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.y_spinbox.setFrame(False)
             self.width_spinbox.setFrame(False)
             self.height_spinbox.setFrame(False)
+        # HACK: Spinboxes are too small on Linux and only fit 3 numbers
+        # We should make the spinboxes larger instead to accomodate all platforms
+        # But we're currently lacking the space
+        if IS_LINUX:
+            font = self.x_spinbox.font()
+            font.setPointSize(7)
+            self.x_spinbox.setFont(font)
+            self.y_spinbox.setFont(font)
+            self.width_spinbox.setFont(font)
+            self.height_spinbox.setFont(font)
 
         # Get default values defined in SettingsDialog
         self.settings_dict = get_default_settings_from_ui(self)
@@ -379,9 +389,9 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             error_messages.region()
             return
 
-        # save and open image
+        # Save and open image
         cv2.imwrite(screenshot_path, capture)
-        os.startfile(screenshot_path)  # nosec
+        open_file(screenshot_path)
 
     def __check_fps(self):
         self.fps_value_label.setText("...")

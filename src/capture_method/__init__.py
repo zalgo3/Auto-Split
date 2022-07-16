@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 import cv2
 import pyscreeze
+from PIL import features
 
 from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
 from capture_method.interface import CaptureMethodInterface
@@ -166,14 +167,15 @@ elif IS_LINUX:
 
     # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
     SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
-    CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
-        name="XDisplay",
-        short_description="fast",
-        description=(
-            "\nUses XDisplay to take screenshots "
-        ),
-        implementation=XDisplayCaptureMethod,
-    )
+    if features.check_feature(feature="xcb"):
+        CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
+            name="XDisplay",
+            short_description="fast",
+            description=(
+                "\nUses XDisplay to take screenshots "
+            ),
+            implementation=XDisplayCaptureMethod,
+        )
     CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
         name="gnome-screenshot",
         short_description="fast, Gnome only",

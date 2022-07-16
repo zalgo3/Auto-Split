@@ -8,8 +8,12 @@ from typing import TYPE_CHECKING, cast
 
 import cv2
 import numpy as np
+import pywinctl
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
+from pywinctl._pywinctl_linux import LinuxWindow
+from Xlib.display import Display
+from Xlib.xobject.drawable import Window
 
 import error_messages
 from utils import IS_WINDOWS, MAXBYTE, get_window_bounds, is_valid_image
@@ -24,6 +28,8 @@ if IS_WINDOWS:
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
+
+GNOME_DESKTOP_ICONS_EXTENSION = "@!0,0;BDHF"
 
 
 SUPPORTED_IMREAD_FORMATS = [
@@ -92,7 +98,7 @@ def select_region(autosplit: AutoSplit):
 
     hwnd, window_text = __get_window_from_point(x, y)
     # Don't select desktop
-    if not win32gui.IsWindow(hwnd) or not window_text:
+    if not hwnd or (IS_WINDOWS and not win32gui.IsWindow(hwnd)) or not window_text:
         error_messages.region()
         return
 
@@ -100,11 +106,22 @@ def select_region(autosplit: AutoSplit):
     autosplit.settings_dict["captured_window_title"] = window_text
     autosplit.capture_method.reinitialize(autosplit)
 
-    left_bounds, top_bounds, *_ = get_window_bounds(hwnd)
-    window_x, window_y, *_ = win32gui.GetWindowRect(hwnd)
+    if IS_WINDOWS:
+        left_bounds, top_bounds, *_ = get_window_bounds(hwnd)
+        window_x, window_y, *_ = win32gui.GetWindowRect(hwnd)
+        offset_x = window_x - left_bounds
+        offset_y = window_y - top_bounds
+    else:
+        xdisplay = Display()
+        root: Window = xdisplay.screen().root
+        data = cast(
+            dict[str, int],
+            root.translate_coords(autosplit.hwnd, 0, 0)._data)  # pyright: ignore [reportPrivateUsage]
+        offset_x = data["x"]
+        offset_y = data["y"]
     __set_region_values(autosplit,
-                        left=x - window_x - left_bounds,
-                        top=y - window_y - top_bounds,
+                        left=x - offset_x,
+                        top=y - offset_y,
                         width=width,
                         height=height)
 
@@ -125,7 +142,7 @@ def select_window(autosplit: AutoSplit):
 
     hwnd, window_text = __get_window_from_point(x, y)
     # Don't select desktop
-    if not win32gui.IsWindow(hwnd) or not window_text:
+    if not hwnd or (IS_WINDOWS and not win32gui.IsWindow(hwnd)) or not window_text:
         error_messages.region()
         return
 
@@ -133,11 +150,24 @@ def select_window(autosplit: AutoSplit):
     autosplit.settings_dict["captured_window_title"] = window_text
     autosplit.capture_method.reinitialize(autosplit)
 
-    # Exlude the borders and titlebar from the window selection. To only get the client area.
-    _, __, window_width, window_height = get_window_bounds(hwnd)
-    _, __, client_width, client_height = win32gui.GetClientRect(hwnd)
-    border_width = ceil((window_width - client_width) / 2)
-    titlebar_with_border_height = window_height - client_height - border_width
+    if IS_WINDOWS:
+        # Exlude the borders and titlebar from the window selection. To only get the client area.
+        _, __, window_width, window_height = get_window_bounds(hwnd)
+        _, __, client_width, client_height = win32gui.GetClientRect(hwnd)
+        border_width = ceil((window_width - client_width) / 2)
+        titlebar_with_border_height = window_height - client_height - border_width
+    else:
+        xdisplay = Display()
+        window = cast(
+            Window,
+            xdisplay.create_resource_object("window", autosplit.hwnd))
+        data = cast(
+            dict[str, int],
+            window.get_geometry()._data)  # pyright: ignore [reportPrivateUsage]
+        client_height = data["height"]
+        client_width = data["width"]
+        border_width = data["border_width"]
+        titlebar_with_border_height = border_width
 
     __set_region_values(autosplit,
                         left=border_width,
@@ -146,19 +176,29 @@ def select_window(autosplit: AutoSplit):
                         height=client_height - border_width * 2)
 
 
-def __get_window_from_point(x: int, y: int):
-    # Grab the window handle from the coordinates selected by the widget
-    hwnd = cast(int, win32gui.WindowFromPoint((x, y)))
+def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
+    if IS_WINDOWS:
+        # Grab the window handle from the coordinates selected by the widget
+        hwnd = cast(int, win32gui.WindowFromPoint((x, y)))
 
-    # Want to pull the parent window from the window handle
-    # By using GetAncestor we are able to get the parent window instead
-    # of the owner window.
-    while win32gui.IsChild(win32gui.GetParent(hwnd), hwnd):
-        hwnd = cast(int, user32.GetAncestor(hwnd, GA_ROOT))
+        # Want to pull the parent window from the window handle
+        # By using GetAncestor we are able to get the parent window instead
+        # of the owner window.
+        while win32gui.IsChild(win32gui.GetParent(hwnd), hwnd):
+            hwnd = cast(int, user32.GetAncestor(hwnd, GA_ROOT))
 
-    window_text = win32gui.GetWindowText(hwnd)
+        window_text = win32gui.GetWindowText(hwnd)
 
-    return hwnd, window_text
+        return hwnd, window_text
+
+    # IS_LINUX
+    windows = [window for window
+               in cast(list[LinuxWindow], pywinctl.getWindowsAt(x, y))
+               if window.title != GNOME_DESKTOP_ICONS_EXTENSION]
+    if len(windows) == 0:
+        return 0, ""
+    window = windows[0]
+    return cast(int, window.getHandle().id), window.title
 
 
 def align_region(autosplit: AutoSplit):
@@ -292,11 +332,19 @@ class BaseSelectWidget(QtWidgets.QWidget):
         super().__init__()
         # We need to pull the monitor information to correctly draw the geometry covering all portions
         # of the user's screen. These parameters create the bounding box with left, top, width, and height
-        self.setGeometry(
-            user32.GetSystemMetrics(SM_XVIRTUALSCREEN),
-            user32.GetSystemMetrics(SM_YVIRTUALSCREEN),
-            user32.GetSystemMetrics(SM_CXVIRTUALSCREEN),
-            user32.GetSystemMetrics(SM_CYVIRTUALSCREEN))
+        if IS_WINDOWS:
+            self.setGeometry(
+                user32.GetSystemMetrics(SM_XVIRTUALSCREEN),
+                user32.GetSystemMetrics(SM_YVIRTUALSCREEN),
+                user32.GetSystemMetrics(SM_CXVIRTUALSCREEN),
+                user32.GetSystemMetrics(SM_CYVIRTUALSCREEN))
+        else:
+            data = cast(dict[str, int], Display().screen().root.get_geometry()._data)
+            self.setGeometry(
+                data["x"],
+                data["y"],
+                data["width"],
+                data["height"])
         self.setWindowTitle(" ")
         self.setWindowOpacity(0.5)
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)

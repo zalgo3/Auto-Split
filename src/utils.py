@@ -2,6 +2,7 @@ import asyncio
 import ctypes
 import ctypes.wintypes
 import os
+import subprocess
 import sys
 from collections.abc import Callable, Iterable
 from platform import version
@@ -43,7 +44,7 @@ T = TypeVar("T")
 
 
 def first(iterable: Iterable[T]) -> T:
-    '''@return: The first element of a collection. Dictionaries will return the first key'''
+    """@return: The first element of a collection. Dictionaries will return the first key"""
     return next(iter(iterable))
 
 
@@ -61,6 +62,14 @@ def get_window_bounds(hwnd: int):
     window_width = cast(int, extended_frame_bounds.right) - cast(int, extended_frame_bounds.left)
     window_height = cast(int, extended_frame_bounds.bottom) - cast(int, extended_frame_bounds.top)
     return window_left_bounds, window_top_bounds, window_width, window_height
+
+
+def open_file(file_path: str):
+    if IS_WINDOWS:
+        os.startfile(file_path)  # nosec
+    else:
+        opener = "xdg-open" if IS_LINUX else "open"
+        subprocess.call([opener, file_path])
 
 
 def fire_and_forget(func: Callable[..., None]):
