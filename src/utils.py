@@ -1,3 +1,4 @@
+from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 import asyncio
 import ctypes
 import ctypes.wintypes
@@ -16,6 +17,7 @@ IS_WINDOWS = platform.startswith("win")
 IS_LINUX = platform.startswith("linux")
 if IS_WINDOWS:
     from win32 import win32gui
+
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
@@ -88,7 +90,10 @@ FROZEN = hasattr(sys, "frozen")
 auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
 """The directory of either the AutoSplit executable or AutoSplit.py"""
 
-# Shared values
-AUTOSPLIT_VERSION = "2.0.0-alpha.4"
+# Shared strings
+# DIRTY_VERSION_EXTENSION = ""
+DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
+"""Set DIRTY_VERSION_EXTENSION to an empty string to generate a clean version number"""
+AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
 START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
 MAXBYTE = 255
