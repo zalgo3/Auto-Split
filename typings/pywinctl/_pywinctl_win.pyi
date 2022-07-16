@@ -7,10 +7,10 @@ if sys.platform != "win32":
     return  # pyright: ignore # noqa: F706
 
 import threading
-from typing import Literal
+from typing import Any, Literal
 
 import win32gui_struct
-from pywinctl import BaseWindow, Rect, Size
+from pywinctl import BaseWindow, Point, Rect, Size
 
 WAIT_ATTEMPTS = ...
 WAIT_DELAY = ...
@@ -64,12 +64,6 @@ class Win32Window(BaseWindow):
         ...
 
     def getClientFrame(self) -> Rect:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
-    def __eq__(self, other) -> bool:
         ...
 
     def close(self) -> bool:
@@ -253,7 +247,7 @@ class _SendBottom(threading.Thread):
         ...
 
 
-def getAllScreens() -> dict:
+def getAllScreens() -> dict[str, dict[str, Any]]:
     ...
 
 
@@ -280,8 +274,4 @@ def displayWindowsUnderMouse(xOffset: int = ..., yOffset: int = ...) -> None:
 
 
 def main() -> None:
-    ...
-
-
-if __name__ == "__main__":
     ...
