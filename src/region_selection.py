@@ -19,7 +19,7 @@ if sys.platform == "linux":
     from Xlib.xobject.drawable import Window
 
 import error_messages
-from utils import MAXBYTE, get_window_bounds, is_valid_image
+from utils import MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
 
 if sys.platform == "win32":
     from win32 import win32gui
@@ -103,8 +103,7 @@ def select_region(autosplit: AutoSplit):
     del selector
 
     hwnd, window_text = __get_window_from_point(x, y)
-    # Don't select desktop
-    if not hwnd or (sys.platform == "win32" and not win32gui.IsWindow(hwnd)) or not window_text:
+    if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
         return
 
@@ -148,8 +147,7 @@ def select_window(autosplit: AutoSplit):
     del selector
 
     hwnd, window_text = __get_window_from_point(x, y)
-    # Don't select desktop
-    if not hwnd or (sys.platform == "win32" and not win32gui.IsWindow(hwnd)) or not window_text:
+    if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
         return
 

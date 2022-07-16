@@ -40,6 +40,3 @@ class ScrotCaptureMethod(CaptureMethodInterface):
 
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return frame, False
-
-    def check_selected_region_exists(self, autosplit: AutoSplit):
-        return True

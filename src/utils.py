@@ -41,6 +41,15 @@ def is_valid_image(image: Optional[cv2.Mat]) -> TypeGuard[cv2.Mat]:
     return image is not None and bool(image.size)
 
 
+def is_valid_hwnd(hwnd: int):
+    """Validate the hwnd points to a valid window and not the desktop or whatever window obtained with `\"\"`"""
+    if not hwnd:
+        return False
+    if sys.platform == "win32" and not (win32gui.IsWindow(hwnd) and win32gui.GetWindowText(hwnd)):
+        return False
+    return True
+
+
 T = TypeVar("T")
 
 
