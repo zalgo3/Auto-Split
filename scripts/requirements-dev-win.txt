@@ -7,5 +7,5 @@
 -r requirements-dev.txt
 -r requirements-win.txt
 #
-# Windows-only types-stubs
-pywin32-stubs>=0.1.6
+# Windows-only type-stubs
+git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs  # https://github.com/kaluluosi/pywin32-stubs/pull/8

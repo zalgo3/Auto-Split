@@ -1,6 +1,4 @@
 import asyncio
-import ctypes
-import ctypes.wintypes
 import os
 import subprocess  # nosec B404
 import sys
@@ -15,6 +13,8 @@ from typing_extensions import TypeGuard
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
 if sys.platform == "win32":
+    import ctypes
+    import ctypes.wintypes
     from win32 import win32gui
 
 

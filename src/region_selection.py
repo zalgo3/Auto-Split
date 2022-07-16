@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import ctypes
-import ctypes.wintypes
 import os
 import sys
 from math import ceil
@@ -9,11 +7,11 @@ from typing import TYPE_CHECKING, cast
 
 import cv2
 import numpy as np
-import pywinctl
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
 
 if sys.platform == "linux":
+    import pywinctl
     from pywinctl._pywinctl_linux import LinuxWindow
     from Xlib.display import Display
     from Xlib.xobject.drawable import Window
@@ -22,6 +20,7 @@ import error_messages
 from utils import MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
 
 if sys.platform == "win32":
+    import ctypes
     from win32 import win32gui
     from win32con import GA_ROOT, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
     from winsdk._winrt import initialize_with_window

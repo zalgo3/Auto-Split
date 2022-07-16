@@ -6,7 +6,6 @@ if sys.platform != "win32":
     raise OSError()
 
 import ctypes
-import ctypes.wintypes
 from typing import TYPE_CHECKING
 
 import cv2
