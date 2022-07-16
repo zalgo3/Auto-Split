@@ -2,20 +2,19 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum, EnumMeta, unique
 from typing import TYPE_CHECKING, TypedDict
 
 import cv2
-import pyscreeze
-from PIL import features
 
 from capture_method.interface import CaptureMethodInterface
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
-from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER, first
+from utils import WINDOWS_BUILD_NUMBER, first
 
-if IS_WINDOWS:
+if sys.platform == "win32":
     from pygrabber.dshow_graph import FilterGraph
     from winsdk.windows.media.capture import MediaCapture
 
@@ -23,7 +22,9 @@ if IS_WINDOWS:
     from capture_method.DesktopDuplicationCaptureMethod import DesktopDuplicationCaptureMethod
     from capture_method.ForceFullContentRenderingCaptureMethod import ForceFullContentRenderingCaptureMethod
     from capture_method.WindowsGraphicsCaptureMethod import WindowsGraphicsCaptureMethod
-if IS_LINUX:
+if sys.platform == "linux":
+    import pyscreeze
+    from PIL import features
 
     from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
     from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
@@ -99,7 +100,7 @@ class CaptureMethodDict(OrderedDict[CaptureMethodEnum, CaptureMethodInfo]):
 
 
 CAPTURE_METHODS = CaptureMethodDict()
-if IS_WINDOWS:
+if sys.platform == "win32":
     def test_for_media_capture():
         async def coroutine():
             return await (MediaCapture().initialize_async() or asyncio.sleep(0))
@@ -118,7 +119,7 @@ if IS_WINDOWS:
             "\nThe smaller the selected region, the more efficient it is. "
         ),
 
-        implementation=BitBltCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+        implementation=BitBltCaptureMethod,
     )
     if (  # Windows Graphics Capture requires a minimum Windows Build
         WINDOWS_BUILD_NUMBER < WGC_MIN_BUILD
@@ -136,7 +137,7 @@ if IS_WINDOWS:
                 "\nAdds a yellow border on Windows 10 (not on Windows 11)."
                 "\nCaps at around 60 FPS. "
             ),
-            implementation=WindowsGraphicsCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+            implementation=WindowsGraphicsCaptureMethod,
         )
     CAPTURE_METHODS[CaptureMethodEnum.DESKTOP_DUPLICATION] = CaptureMethodInfo(
         name="Direct3D Desktop Duplication",
@@ -147,7 +148,7 @@ if IS_WINDOWS:
             "\nAbout 10-15x slower than BitBlt. Not affected by window size. "
             "\nOverlapping windows will show up and can't record across displays. "
         ),
-        implementation=DesktopDuplicationCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+        implementation=DesktopDuplicationCaptureMethod,
     )
     CAPTURE_METHODS[CaptureMethodEnum.PRINTWINDOW_RENDERFULLCONTENT] = CaptureMethodInfo(
         name="Force Full Content Rendering",
@@ -158,9 +159,9 @@ if IS_WINDOWS:
             "\nAbout 10-15x slower than BitBlt based on original window size "
             "\nand can mess up some applications' rendering pipelines. "
         ),
-        implementation=ForceFullContentRenderingCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+        implementation=ForceFullContentRenderingCaptureMethod,
     )
-elif IS_LINUX:
+elif sys.platform == "linux":
     def test_scrot():
         try:
             pyscreeze.screenshot()
@@ -177,7 +178,7 @@ elif IS_LINUX:
             description=(
                 "\nUses XDisplay to take screenshots "
             ),
-            implementation=XDisplayCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+            implementation=XDisplayCaptureMethod,
         )
     CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
         name="gnome-screenshot",
@@ -185,7 +186,7 @@ elif IS_LINUX:
         description=(
             "\nUses gnome-screenshot to take screenshots. "
         ),
-        implementation=GnomeScreenshotCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+        implementation=GnomeScreenshotCaptureMethod,
     )
     if test_scrot():
         # TODO: Investigate solution for Slow Scrot:
@@ -202,7 +203,7 @@ elif IS_LINUX:
                 '\n"scrot" must be installed to use screenshot functions in Linux. '
                 "\nRun: sudo apt-get install scrot"
             ),
-            implementation=ScrotCaptureMethod,  # pyright: ignore [reportUnboundVariable]
+            implementation=ScrotCaptureMethod,
         )
 
 CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
@@ -239,9 +240,9 @@ class CameraInfo():
 
 
 def get_input_devices() -> list[str]:
-    if IS_WINDOWS:
+    if sys.platform == "win32":
         return FilterGraph().get_input_devices()
-    if IS_LINUX:
+    if sys.platform == "linux":
         cameras: list[str] = []
         try:
             for index in range(len(os.listdir("/sys/class/video4linux"))):

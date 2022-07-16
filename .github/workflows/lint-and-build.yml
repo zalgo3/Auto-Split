@@ -22,11 +22,17 @@ on:
       - '**.ui'
 jobs:
   Pyright:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            requirements: requirements-dev-win
+          - os: ubuntu-latest
+            requirements: requirements-dev
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -41,7 +47,7 @@ jobs:
       - run: pip install wheel --upgrade
       - name: Install dependencies
         run: |
-          pip install -r "scripts/requirements-dev-win.txt"
+          pip install -r "scripts/${{ matrix.requirements }}.txt"
           npm install -g pyright
           npm list -g pyright
       - run: scripts/compile_resources.ps1

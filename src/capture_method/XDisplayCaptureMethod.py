@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import sys
+
+if sys.platform != "linux":
+    raise OSError()
+
 from typing import TYPE_CHECKING, Optional, cast
 
 import cv2

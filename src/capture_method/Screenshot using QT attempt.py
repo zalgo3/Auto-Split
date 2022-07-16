@@ -2,6 +2,11 @@
 # flake8: noqa
 from __future__ import annotations
 
+import sys
+
+if sys.platform != "linux":
+    raise OSError()
+
 from io import StringIO
 from typing import TYPE_CHECKING
 

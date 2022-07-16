@@ -14,9 +14,7 @@ from typing_extensions import TypeGuard
 
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
-IS_WINDOWS = platform.startswith("win")
-IS_LINUX = platform.startswith("linux")
-if IS_WINDOWS:
+if sys.platform == "win32":
     from win32 import win32gui
 
 
@@ -68,10 +66,10 @@ def get_window_bounds(hwnd: int):
 
 
 def open_file(file_path: str):
-    if IS_WINDOWS:
-        os.startfile(file_path)  # nosec B606 # pylint: disable=no-member
+    if sys.platform == "win32":
+        os.startfile(file_path)  # nosec B606
     else:
-        opener = "xdg-open" if IS_LINUX else "open"
+        opener = "xdg-open" if sys.platform == "linux" else "open"
         subprocess.call([opener, file_path])   # nosec B603
 
 
