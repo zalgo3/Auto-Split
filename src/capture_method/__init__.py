@@ -11,11 +11,8 @@ import cv2
 import pyscreeze
 from PIL import features
 
-from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
 from capture_method.interface import CaptureMethodInterface
-from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
-from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 from utils import IS_LINUX, IS_WINDOWS, WINDOWS_BUILD_NUMBER, first
 
 if IS_WINDOWS:
@@ -26,6 +23,12 @@ if IS_WINDOWS:
     from capture_method.DesktopDuplicationCaptureMethod import DesktopDuplicationCaptureMethod
     from capture_method.ForceFullContentRenderingCaptureMethod import ForceFullContentRenderingCaptureMethod
     from capture_method.WindowsGraphicsCaptureMethod import WindowsGraphicsCaptureMethod
+if IS_LINUX:
+
+    from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
+    from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
+    from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
+
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -115,7 +118,7 @@ if IS_WINDOWS:
             "\nThe smaller the selected region, the more efficient it is. "
         ),
 
-        implementation=BitBltCaptureMethod,
+        implementation=BitBltCaptureMethod,  # pyright: ignore [reportUnboundVariable]
     )
     if (  # Windows Graphics Capture requires a minimum Windows Build
         WINDOWS_BUILD_NUMBER < WGC_MIN_BUILD
@@ -133,7 +136,7 @@ if IS_WINDOWS:
                 "\nAdds a yellow border on Windows 10 (not on Windows 11)."
                 "\nCaps at around 60 FPS. "
             ),
-            implementation=WindowsGraphicsCaptureMethod,
+            implementation=WindowsGraphicsCaptureMethod,  # pyright: ignore [reportUnboundVariable]
         )
     CAPTURE_METHODS[CaptureMethodEnum.DESKTOP_DUPLICATION] = CaptureMethodInfo(
         name="Direct3D Desktop Duplication",
@@ -144,7 +147,7 @@ if IS_WINDOWS:
             "\nAbout 10-15x slower than BitBlt. Not affected by window size. "
             "\nOverlapping windows will show up and can't record across displays. "
         ),
-        implementation=DesktopDuplicationCaptureMethod,
+        implementation=DesktopDuplicationCaptureMethod,  # pyright: ignore [reportUnboundVariable]
     )
     CAPTURE_METHODS[CaptureMethodEnum.PRINTWINDOW_RENDERFULLCONTENT] = CaptureMethodInfo(
         name="Force Full Content Rendering",
@@ -155,7 +158,7 @@ if IS_WINDOWS:
             "\nAbout 10-15x slower than BitBlt based on original window size "
             "\nand can mess up some applications' rendering pipelines. "
         ),
-        implementation=ForceFullContentRenderingCaptureMethod,
+        implementation=ForceFullContentRenderingCaptureMethod,  # pyright: ignore [reportUnboundVariable]
     )
 elif IS_LINUX:
     def test_scrot():
@@ -174,7 +177,7 @@ elif IS_LINUX:
             description=(
                 "\nUses XDisplay to take screenshots "
             ),
-            implementation=XDisplayCaptureMethod,
+            implementation=XDisplayCaptureMethod,  # pyright: ignore [reportUnboundVariable]
         )
     CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
         name="gnome-screenshot",
@@ -182,7 +185,7 @@ elif IS_LINUX:
         description=(
             "\nUses gnome-screenshot to take screenshots. "
         ),
-        implementation=GnomeScreenshotCaptureMethod,
+        implementation=GnomeScreenshotCaptureMethod,  # pyright: ignore [reportUnboundVariable]
     )
     if test_scrot():
         # TODO: Investigate solution for Slow Scrot:
@@ -199,7 +202,7 @@ elif IS_LINUX:
                 '\n"scrot" must be installed to use screenshot functions in Linux. '
                 "\nRun: sudo apt-get install scrot"
             ),
-            implementation=ScrotCaptureMethod,
+            implementation=ScrotCaptureMethod,  # pyright: ignore [reportUnboundVariable]
         )
 
 CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(

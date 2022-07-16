@@ -25,6 +25,7 @@ class XDisplayCaptureMethod(ThreadedCaptureMethod):
         root: Window = xdisplay.screen().root
         data = cast(
             dict[str, int],
+            # pylint: disable=protected-access
             root.translate_coords(autosplit.hwnd, 0, 0)._data)  # pyright: ignore [reportPrivateUsage]
         offset_x = data["x"]
         offset_y = data["y"]

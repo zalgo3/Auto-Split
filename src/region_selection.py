@@ -116,6 +116,7 @@ def select_region(autosplit: AutoSplit):
         root: Window = xdisplay.screen().root
         data = cast(
             dict[str, int],
+            # pylint: disable=protected-access
             root.translate_coords(autosplit.hwnd, 0, 0)._data)  # pyright: ignore [reportPrivateUsage]
         offset_x = data["x"]
         offset_y = data["y"]
@@ -163,6 +164,7 @@ def select_window(autosplit: AutoSplit):
             xdisplay.create_resource_object("window", autosplit.hwnd))
         data = cast(
             dict[str, int],
+            # pylint: disable=protected-access
             window.get_geometry()._data)  # pyright: ignore [reportPrivateUsage]
         client_height = data["height"]
         client_width = data["width"]

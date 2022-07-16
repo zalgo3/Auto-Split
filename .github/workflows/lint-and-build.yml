@@ -37,22 +37,29 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-win-dev.txt'
+          cache-dependency-path: 'scripts/requirements*.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
         run: |
-          pip install -r "scripts/requirements-win-dev.txt"
+          pip install -r "scripts/requirements-dev-win.txt"
           npm install -g pyright
           npm list -g pyright
       - run: scripts/compile_resources.ps1
+        shell: pwsh
       - name: Analysing the code with Pyright
         run: pyright --warnings
   Pylint:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            requirements: requirements-dev-win
+          - os: ubuntu-latest
+            requirements: requirements-dev
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -61,11 +68,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-win-dev.txt'
+          cache-dependency-path: 'scripts/requirements*.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-win-dev.txt"
+        run: pip install -r "scripts/${{ matrix.requirements }}.txt"
       - run: scripts/compile_resources.ps1
+        shell: pwsh
       - name: Analysing the code with Pylint
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
@@ -75,6 +83,11 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            requirements: requirements-dev-win
+          - os: ubuntu-latest
+            requirements: requirements-dev
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -83,11 +96,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-win-dev.txt'
+          cache-dependency-path: 'scripts/requirements*.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-win-dev.txt"
+        run: pip install -r "scripts/${{ matrix.requirements }}.txt"
       - run: scripts/compile_resources.ps1
+        shell: pwsh
       - name: Analysing the code with Flake8
         run: flake8
   Bandit:
@@ -97,6 +111,11 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            requirements: requirements-dev-win
+          - os: ubuntu-latest
+            requirements: requirements-dev
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -105,11 +124,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'scripts/requirements-win-dev.txt'
+          cache-dependency-path: 'scripts/requirements*.txt'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-win-dev.txt"
+        run: pip install -r "scripts/${{ matrix.requirements }}.txt"
       - run: scripts/compile_resources.ps1
+        shell: pwsh
       - name: Analysing the code with Bandit
         run: bandit -n 1 --severity-level medium --recursive src
   Build:
@@ -119,6 +139,11 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            requirements: requirements-win
+          - os: ubuntu-latest
+            requirements: requirements
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -129,8 +154,9 @@ jobs:
           cache: 'pip'
       - run: pip install wheel --upgrade
       - name: Install dependencies
-        run: pip install -r "scripts/requirements-win.txt"
+        run: pip install -r "scripts/${{ matrix.requirements }}.txt"
       - run: scripts/build.ps1
+        shell: pwsh
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:

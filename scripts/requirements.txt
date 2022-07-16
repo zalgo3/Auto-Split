@@ -24,7 +24,9 @@ certifi
 toml
 psutil
 pygrabber
+PyWinCtl
 typing-extensions
+xlib
 #
 # Build
 PyInstaller

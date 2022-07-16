@@ -3,6 +3,8 @@
 # If you're having issues with the libraries, you might want to first run:
 # pip uninstall -y -r .\scripts\requirements-dev-win.txt
 #
+# Dependencies
+-r requirements.txt
 # Windows-only dependencies:
 pygrabber
 git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs  # https://github.com/kaluluosi/pywin32-stubs/pull/8

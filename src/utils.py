@@ -1,9 +1,8 @@
-from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 import asyncio
 import ctypes
 import ctypes.wintypes
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 from collections.abc import Callable, Iterable
 from platform import version
@@ -12,6 +11,8 @@ from typing import Any, Optional, TypeVar, Union, cast
 
 import cv2
 from typing_extensions import TypeGuard
+
+from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
 IS_WINDOWS = platform.startswith("win")
 IS_LINUX = platform.startswith("linux")
@@ -68,10 +69,10 @@ def get_window_bounds(hwnd: int):
 
 def open_file(file_path: str):
     if IS_WINDOWS:
-        os.startfile(file_path)  # nosec
+        os.startfile(file_path)  # nosec B606 # pylint: disable=no-member
     else:
         opener = "xdg-open" if IS_LINUX else "open"
-        subprocess.call([opener, file_path])
+        subprocess.call([opener, file_path])   # nosec B603
 
 
 def fire_and_forget(func: Callable[..., None]):
