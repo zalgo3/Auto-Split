@@ -49,7 +49,10 @@ def first(iterable: Iterable[T]) -> T:
     return next(iter(iterable))
 
 
-def get_window_bounds(hwnd: int):
+def get_window_bounds(hwnd: int) -> tuple[int, int, int, int]:
+    if sys.platform != "win32":
+        raise OSError()
+
     extended_frame_bounds = ctypes.wintypes.RECT()
     ctypes.windll.dwmapi.DwmGetWindowAttribute(
         hwnd,

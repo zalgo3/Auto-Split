@@ -60,6 +60,9 @@ def __select_graphics_item(autosplit: AutoSplit):  # pyright: ignore [reportUnus
     """
     Uses the built-in GraphicsCapturePicker to select the Window
     """
+    if sys.platform != "win32":
+        raise OSError()
+
     def callback(async_operation: IAsyncOperation[GraphicsCaptureItem], async_status: AsyncStatus):
         try:
             if async_status != AsyncStatus.COMPLETED:

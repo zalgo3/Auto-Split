@@ -13,7 +13,6 @@ aggressive = 3
 
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md#sample-pyprojecttoml-file
 [tool.pyright]
-pythonPlatform = "Windows"
 typeCheckingMode = "strict"
 # Extra strict
 reportImplicitStringConcatenation="error"
