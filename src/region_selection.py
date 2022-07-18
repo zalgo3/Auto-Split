@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 SUPPORTED_IMREAD_FORMATS = [
-    ("Windows bitmaps", "*.bmp *.dib"),
+    ('Windows bitmaps', "*.bmp *.dib"),
     ("JPEG files", "*.jpeg *.jpg *.jpe"),
     ("JPEG 2000 files", "*.jp2"),
     ("Portable Network Graphics", "*.png"),

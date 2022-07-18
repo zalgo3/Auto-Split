@@ -7,3 +7,5 @@ python -m pip install -r "$PSScriptRoot/requirements-dev.txt"
 & "$PSScriptRoot/compile_resources.ps1"
 npm install -g pyright@latest
 npm list -g pyright
+
+nitpick fix

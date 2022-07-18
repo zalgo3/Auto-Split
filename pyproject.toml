@@ -1,3 +1,9 @@
+# https://nitpick.readthedocs.io/en/latest/configuration.html#multiple-styles
+[tool.nitpick]
+style = [
+  "https://github.com/Avasam/nitpick.styles/blob/main/python.toml",
+]
+
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-via-a-file
 [tool.black]
 line-length = 120
@@ -13,7 +19,6 @@ aggressive = 3
 
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md#sample-pyprojecttoml-file
 [tool.pyright]
-pythonPlatform = "Windows"
 typeCheckingMode = "strict"
 # Extra strict
 reportImplicitStringConcatenation="error"
@@ -33,14 +38,14 @@ exclude = [
 reportMissingTypeStubs = "warning"
 # False positives with TYPE_CHECKING
 reportImportCycles = "information"
-# False positives with PyQt .connect. pylint(no-member) works instead
-reportFunctionMemberAccess = "none"
 # Extra runtime safety
 reportUnnecessaryComparison = "warning"
 # Flake8 does a better job
 reportUnusedImport = "none"
 # numpy has way too many complex types that triggers this
 reportUnknownMemberType = "none"
+# False positives with PyQt .connect. pylint(no-member) works instead
+reportFunctionMemberAccess = "none"
 
 # https://github.com/PyCQA/pylint/blob/main/examples/pylintrc
 # https://pylint.pycqa.org/en/latest/technical_reference/features.html
@@ -81,6 +86,8 @@ ignore-paths = [
   "^.*.pyi$",
 ]
 extension-pkg-allow-list = ["PyQt6", "PySide6", "win32ui"]
+# Dynamic/Generated members from SQLAlchemy
+ignored-classes = ["scoped_session"]
 
 [tool.pylint.FORMAT]
 max-line-length = 120
@@ -97,9 +104,6 @@ max-locals = 15
 max-complexity = 15
 # At least same as max-complexity
 max-branches = 15
-# https://github.com/PyCQA/pep8-naming/issues/164
-# OR doesn't fit CaptureMethodMeta
-valid-classmethod-first-arg = "self"
 # https://pylint.pycqa.org/en/latest/user_guide/options.html#naming-styles
 module-naming-style = "any"
 # Can't make private class with PascalCase
@@ -108,26 +112,32 @@ good-names = [
   # PyQt methods
   "closeEvent", "paintEvent", "keyPressEvent", "mousePressEvent", "mouseMoveEvent", "mouseReleaseEvent",
   # https://github.com/PyCQA/pylint/issues/2018
-  "id", "x", "y", "a0", "i", "t0", "t1"]
+  "id", "x", "y", "a0", "i", "t0", "t1",
+]
 disable = [
   # No need to mention the fixmes
   "fixme",
-  "missing-docstring",
-  # We group imports
-  "wrong-import-position",
-  # Already taken care of and grayed out. Also conflicts with Pylance reportIncompatibleMethodOverride
+  # Already taken care of and grayed out. Also conflicts with Pyright reportIncompatibleMethodOverride
   "unused-argument",
-  # Already taken care of by Flake8
+  # Already taken care of by Flake8 and isort
+  "ungrouped-imports",
   "unused-import",
-  # Similar lines in 2 files, doesn't really work
-  "R0801",
+  "wrong-import-order",
+  "wrong-import-position",
   # Doesn't work with local imports
   "import-error",
+  # Similar lines in 2 files, doesn't really work
+  "R0801",
+  # We don't document every single method
+  "missing-docstring",
   # False positives with PyQt .connect
   "no-value-for-parameter",
   # Not as long as we support Python 3.9
   "consider-alternative-union-syntax",
 ]
+# https://github.com/PyCQA/pep8-naming/issues/164
+# OR doesn't fit CaptureMethodMeta
+valid-classmethod-first-arg = "self"
 
 [tool.pylint.TYPECHECK]
 generated-members = [
