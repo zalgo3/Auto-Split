@@ -13,7 +13,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": true,
-    "source.organizeImports": true,
+    "source.organizeImports": true
   },
   "files.insertFinalNewline": true,
   "trailing-spaces.includeEmptyLines": true,
@@ -37,13 +37,13 @@
     "**/Thumbs.db": true,
     "build": true,
     ".mypy_cache": true,
-    "**/__pycache__": true,
+    "**/__pycache__": true
   },
   "search.exclude": {
     "**/bower_components": true,
     "**/*.code-search": true,
     "*.lock": true,
-    "typings": true,
+    "typings": true
   },
   "[python]": {
     "editor.tabSize": 4,
@@ -52,7 +52,7 @@
       // 79, // PEP8-17 default max
       // 88, // Black default
       99, // PEP8-17 acceptable max
-      120, // Our hard rule
+      120 // Our hard rule
     ]
   },
   "python.linting.enabled": true,
