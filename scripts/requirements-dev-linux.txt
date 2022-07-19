@@ -6,6 +6,3 @@
 # Dependencies
 -r requirements-dev.txt
 -r requirements-linux.txt
-#
-# Windows-only type-stubs
-git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs  # https://github.com/kaluluosi/pywin32-stubs/pull/8
