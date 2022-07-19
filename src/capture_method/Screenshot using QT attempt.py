@@ -1,6 +1,5 @@
 # pylint: skip-file
 # flake8: noqa
-# type: ignore
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,7 @@ if sys.platform != "linux":
     raise OSError()
 
 from io import StringIO
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import cv2
 import numpy as np
@@ -37,7 +36,7 @@ class ScrotCaptureMethod(CaptureMethodInterface):
         b = image.bits()
         # sip.voidptr must know size to support python buffer interface
         b.setsize(200 * 200 * 3)
-        frame = np.frombuffer(b, np.uint8).reshape((200, 200, 3))
+        frame = np.frombuffer(cast(cv2.Mat, b), np.uint8).reshape((200, 200, 3))
 
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return frame, False
