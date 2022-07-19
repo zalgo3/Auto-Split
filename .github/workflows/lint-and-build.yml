@@ -122,7 +122,6 @@ jobs:
           cache: 'pip'
       - run: scripts/install.ps1
         shell: pwsh
-      - run: dpkg -s libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
       - run: scripts/build.ps1
         shell: pwsh
       - name: Upload Build Artifact
