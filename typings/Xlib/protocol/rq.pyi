@@ -6,6 +6,9 @@ from typing import Any, Literal
 
 from Xlib.xobject import drawable
 
+Unknown = Any
+
+
 _PY3: bool = ...
 
 
@@ -309,7 +312,7 @@ class Object(ValueField):
     def pack_value(self, val) -> tuple[bytes, None, None]:
         ...
 
-    def check_value(self, val) -> tuple[Unknown, ...] | list[Unknown]:
+    def check_value(self, val) -> tuple[Unknown, ...] | list:
         ...
 
 
@@ -352,7 +355,7 @@ class ValueList(Field):
 class KeyboardMapping(ValueField):
     structcode = ...
 
-    def parse_binary_value(self, data, display, length, format) -> tuple[list[Unknown], Unknown]:
+    def parse_binary_value(self, data, display, length, format) -> tuple[list, Unknown]:
         ...
 
     def pack_value(self, value) -> tuple[bytes, int, int]:
@@ -362,7 +365,7 @@ class KeyboardMapping(ValueField):
 class ModifierMapping(ValueField):
     structcode = ...
 
-    def parse_binary_value(self, data, display, length, format) -> tuple[list[Unknown], Unknown]:
+    def parse_binary_value(self, data, display, length, format) -> tuple[list, Unknown]:
         ...
 
     def pack_value(self, value) -> tuple[bytes, int, int]:
@@ -441,7 +444,7 @@ class TextElements8(ValueField):
     def pack_value(self, value):
         ...
 
-    def parse_binary_value(self, data, display, length, format) -> tuple[list[Unknown], Literal[b'']]:
+    def parse_binary_value(self, data, display, length, format) -> tuple[list, Literal[b'']]:
         ...
 
 

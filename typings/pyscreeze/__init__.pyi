@@ -18,10 +18,12 @@ http://ubuntuforums.org/showthread.php?t=1751455
 # from contextlib import contextmanager
 import sys
 from collections.abc import Callable, Generator
-from typing import NamedTuple
+from typing import Any, NamedTuple, Optional  # noqa Y037
 
 import cv2
 from PIL.Image import Image
+
+Unknown = Any
 
 __version__: str = ...
 useOpenCV: bool
@@ -35,9 +37,10 @@ _PYGETWINDOW_UNAVAILABLE: bool = ...
 GRAYSCALE_DEFAULT: bool = ...
 USE_IMAGE_NOT_FOUND_EXCEPTION: bool = ...
 scrotExists: bool = ...
-Box = NamedTuple('Box', 'left top width height')
-Point = NamedTuple('Point', 'x y')
-RGB = NamedTuple('RGB', 'red green blue')
+# TODO: idk how to properly do NamedTuples according to Y028
+Box = NamedTuple('Box', 'left top width height')  # noqa Y028
+Point = NamedTuple('Point', 'x y')  # noqa Y028
+RGB = NamedTuple('RGB', 'red green blue')  # noqa Y028
 
 
 class PyScreezeException(Exception):
@@ -89,7 +92,7 @@ def pixel(x, y) -> RGB:
     ...
 
 
-def screenshot(imageFilename: Unknown | None = ..., region: Unknown | None = ...) -> Image:
+def screenshot(imageFilename: Optional = ..., region: Optional = ...) -> Image:
     ...
 
 
@@ -99,9 +102,9 @@ grab = screenshot
 def locateAll(
     needleImage: Unknown,
     haystackImage: Unknown,
-    grayscale: Unknown | None = ...,
+    grayscale: Optional = ...,
     limit: int = ...,
-    region: Unknown | None = ...,
+    region: Optional = ...,
     step: int = ...,
     confidence: float = ...
 ) -> Generator[Box, None, None]:

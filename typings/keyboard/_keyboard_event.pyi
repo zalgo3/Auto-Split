@@ -4,10 +4,7 @@ https://github.com/boppreh/keyboard/issues/505
 """
 from __future__ import annotations
 
-from typing import Any, Literal
-
-Unknown = Any
-
+from typing import Literal, Optional  # noqa Y037
 
 KEY_DOWN: Literal["down"]
 KEY_UP: Literal["up"]
@@ -18,7 +15,7 @@ class KeyboardEvent:
     scan_code: None | int = ...
     name: None | str = ...
     time: None | float = ...
-    device: Unknown | None = ...
+    device: Optional = ...
     modifiers: None | tuple = ...
     is_keypad: None | bool = ...
 
@@ -28,7 +25,7 @@ class KeyboardEvent:
             scan_code: None | int,
             name: None | str = ...,
             time: None | float = ...,
-            device: Unknown | None = ...,
+            device: Optional = ...,
             modifiers: None | tuple = ...,
             is_keypad: None | bool = ...) -> None:
         ...
