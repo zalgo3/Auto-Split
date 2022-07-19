@@ -129,3 +129,13 @@ jobs:
         with:
           name: AutoSplit for ${{ matrix.os }} (Python ${{ matrix.python-version }})
           path: dist/AutoSplit.*
+          if-no-files-found: error
+      - name: Upload Build logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build logs for ${{ matrix.os }} (Python ${{ matrix.python-version }})
+          path: |
+            build/AutoSplit/*.toc
+            build/AutoSplit/*.txt
+            build/AutoSplit/*.html
+          if-no-files-found: error
