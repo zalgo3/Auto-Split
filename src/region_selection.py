@@ -21,6 +21,7 @@ from utils import MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
 
 if sys.platform == "win32":
     import ctypes
+
     from win32 import win32gui
     from win32con import GA_ROOT, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
     from winsdk._winrt import initialize_with_window

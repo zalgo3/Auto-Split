@@ -8,7 +8,6 @@
     "ms-python.vscode-pylance",
     "pkief.material-icon-theme",
     "shardulm94.trailing-spaces",
-    "sonarsource.sonarlint-vscode"
   ],
   "unwantedRecommendations": [
     // VSCode has implemented an optimized version
@@ -21,5 +20,8 @@
     "ms-vscode.vscode-typescript-tslint-plugin",
     // Obsoleted by Pylance
     "ms-pyright.pyright",
+    // Not configurable per workspace, tends to conflict with other linters
+    // Use eslint-plugin-sonarjs for JS/TS projects
+    "sonarsource.sonarlint-vscode",
   ]
 }
