@@ -6,7 +6,7 @@ If ($IsWindows) {
 }
 ElseIf ($IsLinux) {
   # Required for splash screen
-  sudo apt-get install python3-tk libxrender-dev
+  sudo apt-get install python3-tk libxrender-dev libxkbcommon-dev
   pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
 }
 Else {
