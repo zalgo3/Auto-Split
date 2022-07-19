@@ -1,11 +1,17 @@
 & "$PSScriptRoot/compile_resources.ps1"
-pyinstaller `
-  --windowed `
-  --onefile `
-  --additional-hooks-dir=Pyinstaller/hooks `
-  --icon=res/icon.ico `
-  --splash=res/splash.png `
-  "$PSScriptRoot/../src/AutoSplit.py"
+
+$arguments = @(
+  '--windowed',
+  '--onefile',
+  '--additional-hooks-dir=Pyinstaller/hooks',
+  '--icon=res/icon.ico',
+  '--splash=res/splash.png')
+if ($IsLinux) {
+  $arguments += @(
+    '--hidden-import pynput.keyboard._xorg',
+    '--hidden-import pynput.mouse._xorg')
+}
+Start-Process pyinstaller -Wait -ArgumentList "$arguments `"$PSScriptRoot/../src/AutoSplit.py`""
 
 If ($IsLinux) {
   Move-Item -Force $PSScriptRoot/../dist/AutoSplit $PSScriptRoot/../dist/AutoSplit.elf
