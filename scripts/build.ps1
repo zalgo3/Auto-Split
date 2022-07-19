@@ -12,4 +12,6 @@ If ($IsLinux) {
   If ($?) {
     Write-Host 'Added .elf extension'
   }
+  chmod +x $PSScriptRoot/../dist/AutoSplit.elf
+  Write-Host 'Added execute permission'
 }
