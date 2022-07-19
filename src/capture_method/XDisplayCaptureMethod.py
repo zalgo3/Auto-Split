@@ -5,13 +5,12 @@ import sys
 if sys.platform != "linux":
     raise OSError()
 
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, Optional
 
 import cv2
 import numpy as np
 from PIL import ImageGrab
 from Xlib.display import Display
-from Xlib.xobject.drawable import Window
 
 from capture_method.interface import ThreadedCaptureMethod
 from utils import is_valid_image
@@ -27,11 +26,9 @@ class XDisplayCaptureMethod(ThreadedCaptureMethod):
         if not self.check_selected_region_exists(autosplit):
             return None
         xdisplay = Display()
-        root: Window = xdisplay.screen().root
-        data = cast(
-            dict[str, int],
-            # pylint: disable=protected-access
-            root.translate_coords(autosplit.hwnd, 0, 0)._data)  # pyright: ignore [reportPrivateUsage]
+        root = xdisplay.screen().root
+        # pylint: disable=protected-access
+        data = root.translate_coords(autosplit.hwnd, 0, 0)._data
         offset_x = data["x"]
         offset_y = data["y"]
         # image = window.get_image(selection["x"], selection["y"], selection["width"], selection["height"], 1, 0)
@@ -55,10 +52,10 @@ class XDisplayCaptureMethod(ThreadedCaptureMethod):
 
     def recover_window(self, captured_window_title: str, autosplit: AutoSplit):
         xdisplay = Display()
-        root: Window = xdisplay.screen().root
-        children: list[Window] = root.query_tree().children
+        root = xdisplay.screen().root
+        children = root.query_tree().children
         for window in children:
-            wm_class = cast(Optional[tuple[str, str]], window.get_wm_class())
+            wm_class = window.get_wm_class()
             if wm_class and wm_class[1] == captured_window_title:
                 autosplit.hwnd = window.id
                 return self.check_selected_region_exists(autosplit)

@@ -1,5 +1,6 @@
 # pylint: skip-file
 # flake8: noqa
+# type: ignore
 from __future__ import annotations
 
 import sys

@@ -8,10 +8,6 @@ from typing import Literal
 
 from pyrect import Box
 
-from ._pywinctl_win import (Win32Window, checkPermissions, getActiveWindow, getActiveWindowTitle, getAllAppsNames,
-                            getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows, getAppsWithName,
-                            getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle, getWorkArea)
-
 __all__ = [
     "checkPermissions",
     "getActiveWindow",
@@ -376,6 +372,24 @@ class _WinWatchDog(threading.Thread):
 
 
 if sys.platform == "darwin":
-    ...
-else:
+    from ._pywinctl_macos import (MacOSNSWindow, MacOSWindow, checkPermissions, getActiveWindow, getActiveWindowTitle,
+                                  getAllAppsNames, getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows,
+                                  getAppsWithName, getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle,
+                                  getWorkArea)
+
+    Window = MacOSWindow
+    NSWindow = MacOSNSWindow
+
+elif sys.platform == "win32":
+    from ._pywinctl_win import (Win32Window, checkPermissions, getActiveWindow, getActiveWindowTitle, getAllAppsNames,
+                                getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows, getAppsWithName,
+                                getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle, getWorkArea)
+
     Window = Win32Window
+
+elif sys.platform == "linux":
+    from ._pywinctl_linux import (LinuxWindow, checkPermissions, getActiveWindow, getActiveWindowTitle, getAllAppsNames,
+                                  getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows, getAppsWithName,
+                                  getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle, getWorkArea)
+
+    Window = LinuxWindow

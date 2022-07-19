@@ -12,7 +12,6 @@ from PyQt6.QtTest import QTest
 
 if sys.platform == "linux":
     import pywinctl
-    from pywinctl._pywinctl_linux import LinuxWindow
     from Xlib.display import Display
     from Xlib.xobject.drawable import Window
 
@@ -118,11 +117,9 @@ def select_region(autosplit: AutoSplit):
         offset_y = window_y - top_bounds
     else:
         xdisplay = Display()
-        root: Window = xdisplay.screen().root
-        data = cast(
-            dict[str, int],
-            # pylint: disable=protected-access
-            root.translate_coords(autosplit.hwnd, 0, 0)._data)  # pyright: ignore [reportPrivateUsage]
+        root = xdisplay.screen().root
+        # pylint: disable=protected-access
+        data = root.translate_coords(autosplit.hwnd, 0, 0)._data
         offset_x = data["x"]
         offset_y = data["y"]
     __set_region_values(autosplit,
@@ -166,10 +163,8 @@ def select_window(autosplit: AutoSplit):
         window = cast(
             Window,
             xdisplay.create_resource_object("window", autosplit.hwnd))
-        data = cast(
-            dict[str, int],
-            # pylint: disable=protected-access
-            window.get_geometry()._data)  # pyright: ignore [reportPrivateUsage]
+        # pylint: disable=protected-access
+        data = window.get_geometry()._data
         client_height = data["height"]
         client_width = data["width"]
         border_width = data["border_width"]
@@ -198,12 +193,12 @@ def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
         return hwnd, window_text
 
     windows = [window for window
-               in cast(list[LinuxWindow], pywinctl.getWindowsAt(x, y))
+               in pywinctl.getWindowsAt(x, y)
                if window.title != GNOME_DESKTOP_ICONS_EXTENSION]
     if len(windows) == 0:
         return 0, ""
     window = windows[0]
-    return cast(int, window.getHandle().id), window.title
+    return window.getHandle().id, window.title
 
 
 def align_region(autosplit: AutoSplit):
@@ -344,7 +339,7 @@ class BaseSelectWidget(QtWidgets.QWidget):
                 user32.GetSystemMetrics(SM_CXVIRTUALSCREEN),
                 user32.GetSystemMetrics(SM_CYVIRTUALSCREEN))
         else:
-            data = cast(dict[str, int], Display().screen().root.get_geometry()._data)
+            data = Display().screen().root.get_geometry()._data
             self.setGeometry(
                 data["x"],
                 data["y"],
