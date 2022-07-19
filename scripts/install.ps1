@@ -1,14 +1,23 @@
-If ($IsLinux) {
-  sudo apt-get install python3-tk
-}
+$dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
 
-python -m pip install wheel --upgrade
+pip install wheel --upgrade
 If ($IsWindows) {
-  python -m pip install -r "$PSScriptRoot/requirements-dev-win.txt"
+  pip install -r "$PSScriptRoot/requirements$dev-win32.txt"
+}
+ElseIf ($IsLinux) {
+  sudo apt-get install python3-tk
+  pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
 }
 Else {
-  python -m pip install -r "$PSScriptRoot/requirements-dev.txt"
+  pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
-& "$PSScriptRoot/compile_resources.ps1"
-npm install -g pyright@latest
-npm list -g pyright
+
+If ($dev) {
+  Write-Host "`n"
+  & "$PSScriptRoot/compile_resources.ps1"
+}
+
+if (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Pyright') {
+  npm install -g pyright@latest
+  npm list -g pyright
+}

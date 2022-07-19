@@ -1,11 +1,11 @@
 # Usage: .\scripts\install.bat
 #
 # If you're having issues with the libraries, you might want to first run:
-# pip uninstall -y -r .\scripts\requirements-dev-win.txt
+# pip uninstall -y -r .\scripts\requirements-dev-win32.txt
 #
 # Dependencies
 -r requirements-dev.txt
--r requirements-win.txt
+-r requirements-win32.txt
 #
 # Windows-only type-stubs
 git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs  # https://github.com/kaluluosi/pywin32-stubs/pull/8

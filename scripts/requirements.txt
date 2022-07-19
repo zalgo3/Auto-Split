@@ -23,9 +23,6 @@ certifi
 toml
 psutil
 typing-extensions
-# Linux-only dependencies
-PyWinCtl
-xlib
 #
 # Build and compile resources
 PyInstaller
