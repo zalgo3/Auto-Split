@@ -3,6 +3,7 @@ pyinstaller `
   --windowed `
   --onefile `
   --additional-hooks-dir=Pyinstaller/hooks `
+  --hidden-import pynput.keyboard._xorg `
   --icon=res/icon.ico `
   --splash=res/splash.png `
   "$PSScriptRoot/../src/AutoSplit.py"
