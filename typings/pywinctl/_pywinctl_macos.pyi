@@ -6,7 +6,7 @@ import sys
 if sys.platform != "darwin":
     return  # pyright: ignore # noqa: F706
 
-from typing import Literal
+from typing import Any, Literal
 
 import AppKit
 from pywinctl import BaseWindow, Point, Rect, Size
@@ -67,12 +67,6 @@ class MacOSWindow(BaseWindow):
     def getClientFrame(self) -> Rect:
         ...
 
-    def __repr__(self) -> str:
-        ...
-
-    def __eq__(self, other) -> bool:
-        ...
-
     def close(self, force: bool = ...) -> bool:
         ...
 
@@ -131,7 +125,7 @@ class MacOSWindow(BaseWindow):
     def getParent(self) -> str:
         ...
 
-    def getChildren(self) -> list[Unknown]:
+    def getChildren(self) -> list[str]:
         ...
 
     def getHandle(self) -> str:
@@ -255,12 +249,6 @@ class MacOSNSWindow(BaseWindow):
         ...
 
     def getClientFrame(self) -> Rect:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
-    def __eq__(self, other) -> bool:
         ...
 
     def close(self) -> bool:
@@ -418,7 +406,7 @@ def getMousePos() -> Point:
 cursor = ...
 
 
-def getAllScreens() -> dict[Unknown, Unknown]:
+def getAllScreens() -> dict[str, dict[str, Any]]:
     ...
 
 
@@ -438,8 +426,4 @@ def displayWindowsUnderMouse(xOffset: int = ..., yOffset: int = ...) -> None:
 
 
 def main() -> None:
-    ...
-
-
-if __name__ == "__main__":
     ...

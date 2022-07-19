@@ -1,6 +1,4 @@
 import asyncio
-import ctypes
-import ctypes.wintypes
 import os
 import subprocess  # nosec B404
 import sys
@@ -15,6 +13,8 @@ from typing_extensions import TypeGuard
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
 if sys.platform == "win32":
+    import ctypes
+    import ctypes.wintypes
     from win32 import win32gui
 
 
@@ -39,6 +39,15 @@ def is_digit(value: Optional[Union[str, int]]):
 
 def is_valid_image(image: Optional[cv2.Mat]) -> TypeGuard[cv2.Mat]:
     return image is not None and bool(image.size)
+
+
+def is_valid_hwnd(hwnd: int):
+    """Validate the hwnd points to a valid window and not the desktop or whatever window obtained with `\"\"`"""
+    if not hwnd:
+        return False
+    if sys.platform == "win32" and not (win32gui.IsWindow(hwnd) and win32gui.GetWindowText(hwnd)):
+        return False
+    return True
 
 
 T = TypeVar("T")

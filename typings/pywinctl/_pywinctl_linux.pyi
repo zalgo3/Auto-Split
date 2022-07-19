@@ -6,7 +6,7 @@ import sys
 if sys.platform != "linux":
     return  # pyright: ignore # noqa: F706
 
-from typing import Literal
+from typing import Any, Literal
 
 from pywinctl import BaseWindow, Point, Rect, Size
 from Xlib.xobject.colormap import Colormap
@@ -84,7 +84,7 @@ def getAllAppsWindowsTitles() -> dict:
     ...
 
 
-def getWindowsAt(x: int, y: int) -> list[Unknown]:
+def getWindowsAt(x: int, y: int) -> list[LinuxWindow]:
     ...
 
 
@@ -96,12 +96,6 @@ class LinuxWindow(BaseWindow):
         ...
 
     def getClientFrame(self) -> Rect:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
-    def __eq__(self, other) -> bool:
         ...
 
     def close(self) -> bool:
@@ -252,7 +246,7 @@ class LinuxWindow(BaseWindow):
             ...
 
 
-def getAllScreens() -> dict[Unknown, Unknown]:
+def getAllScreens() -> dict[str, dict[str, Any]]:
     ...
 
 
@@ -279,8 +273,4 @@ def displayWindowsUnderMouse(xOffset: int = ..., yOffset: int = ...) -> None:
 
 
 def main() -> None:
-    ...
-
-
-if __name__ == "__main__":
     ...

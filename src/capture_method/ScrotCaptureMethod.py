@@ -49,6 +49,3 @@ class ScrotCaptureMethod(ThreadedCaptureMethod):
 
     def recover_window(self, captured_window_title: str, autosplit: AutoSplit) -> bool:
         raise NotImplementedError()
-
-    def check_selected_region_exists(self, autosplit: AutoSplit):
-        return bool(autosplit.hwnd)

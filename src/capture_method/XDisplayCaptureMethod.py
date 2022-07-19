@@ -63,6 +63,3 @@ class XDisplayCaptureMethod(ThreadedCaptureMethod):
                 autosplit.hwnd = window.id
                 return self.check_selected_region_exists(autosplit)
         return False
-
-    def check_selected_region_exists(self, autosplit: AutoSplit):
-        return bool(autosplit.hwnd)

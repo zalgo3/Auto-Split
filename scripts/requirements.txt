@@ -13,7 +13,6 @@
 numpy>=1.22.0rc1,<1.23 # Type issue
 opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
 PyQt6>=6.2.1
-PySide6
 ImageHash
 keyboard
 packaging
@@ -23,10 +22,11 @@ requests
 certifi
 toml
 psutil
-pygrabber
-PyWinCtl
 typing-extensions
+# Linux-only dependencies
+PyWinCtl
 xlib
 #
-# Build
+# Build and compile resources
 PyInstaller
+PySide6

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Optional
 import cv2
 
 from error_messages import CREATE_NEW_ISSUE_MESSAGE, exception_traceback
+from utils import is_valid_hwnd
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -37,7 +38,7 @@ class CaptureMethodInterface():
         raise NotImplementedError()
 
     def check_selected_region_exists(self, autosplit: AutoSplit) -> bool:
-        raise NotImplementedError()
+        return is_valid_hwnd(autosplit.hwnd)
 
 
 class ThreadedCaptureMethod(CaptureMethodInterface):
