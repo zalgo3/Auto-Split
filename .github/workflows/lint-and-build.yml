@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -50,7 +50,7 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
-        # os: [windows-latest, ubuntu-latest]
+        # os: [windows-latest, ubuntu-22.04]
         os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
@@ -71,7 +71,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -91,7 +91,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -111,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10"]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
