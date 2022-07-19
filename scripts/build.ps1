@@ -8,8 +8,10 @@ pyinstaller `
   "$PSScriptRoot/../src/AutoSplit.py"
 
 If ($IsLinux) {
-  Move-Item $PSScriptRoot/../dist/AutoSplit $PSScriptRoot/../dist/AutoSplit.elf
-  If ($LastExitCode -eq 0) {
+  Move-Item -Force $PSScriptRoot/../dist/AutoSplit $PSScriptRoot/../dist/AutoSplit.elf
+  If ($?) {
     Write-Host 'Added .elf extension'
   }
+  chmod +x $PSScriptRoot/../dist/AutoSplit.elf
+  Write-Host 'Added execute permission'
 }
