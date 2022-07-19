@@ -1,7 +1,7 @@
 & "$PSScriptRoot/compile_resources.ps1"
 pyinstaller `
   --windowed `
-  --onefile `
+  --onedir `
   --additional-hooks-dir=Pyinstaller/hooks `
   --hidden-import pynput.keyboard._xorg `
   --hidden-import pynput.mouse._xorg `
