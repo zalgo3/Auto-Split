@@ -15,6 +15,7 @@ from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 if sys.platform == "win32":
     import ctypes
     import ctypes.wintypes
+
     from win32 import win32gui
 
 
