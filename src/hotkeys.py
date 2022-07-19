@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Union
 import keyboard
 import pyautogui
 
+from error_messages import exception_traceback
 from utils import FROZEN, START_AUTO_SPLITTER_TEXT, is_digit
 
 if TYPE_CHECKING:
@@ -218,11 +219,11 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
     # New thread points to callback. this thread is needed or GUI will freeze
     # while the program waits for user input on the hotkey
     def callback():
-        hotkey_name = preselected_hotkey_name if preselected_hotkey_name else __read_hotkey()
-
-        __remove_key_already_set(autosplit, hotkey_name)
-
         try:
+            hotkey_name = preselected_hotkey_name if preselected_hotkey_name else __read_hotkey()
+
+            __remove_key_already_set(autosplit, hotkey_name)
+
             action = __get_hotkey_action(autosplit, hotkey)
             setattr(
                 autosplit,
@@ -241,16 +242,17 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
                     hotkey_name,
                     lambda keyboard_event: _hotkey_action(keyboard_event, hotkey_name, action))
             )
-        except ImportError as error:
-            if not FROZEN:
-                print(error)
-            else:
-                raise
 
-        if autosplit.SettingsWidget:
-            getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)
-        autosplit.settings_dict[f"{hotkey}_hotkey"] = hotkey_name
-        autosplit.after_setting_hotkey_signal.emit()
+            if autosplit.SettingsWidget:
+                getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)
+            autosplit.settings_dict[f"{hotkey}_hotkey"] = hotkey_name
+            autosplit.after_setting_hotkey_signal.emit()
+        except ImportError as exception:
+            if not FROZEN:
+                print(exception)
+            else:
+                error = exception
+                autosplit.show_error_signal.emit(lambda: exception_traceback(error))
 
     # Try to remove the previously set hotkey if there is one.
     _unhook(getattr(autosplit, f"{hotkey}_hotkey"))

@@ -153,20 +153,24 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
             change_capture_method(CaptureMethodEnum.VIDEO_CAPTURE_DEVICE, self.autosplit)
 
     async def __set_all_capture_devices(self):
-        self.__video_capture_devices = await get_all_video_capture_devices()
-        if len(self.__video_capture_devices) > 0:
-            for i in range(self.capture_device_combobox.count()):
-                self.capture_device_combobox.removeItem(i)
-            self.capture_device_combobox.addItems([
-                f"* {device.name}"
-                + (f" [{device.backend}]" if device.backend else "")
-                + (" (occupied)" if device.occupied else "")
-                for device in self.__video_capture_devices])
-            self.capture_device_combobox.setEnabled(True)
-            self.capture_device_combobox.setCurrentIndex(
-                self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
-        else:
-            self.capture_device_combobox.setPlaceholderText("No device found.")
+        try:
+            self.__video_capture_devices = await get_all_video_capture_devices()
+            if len(self.__video_capture_devices) > 0:
+                for i in range(self.capture_device_combobox.count()):
+                    self.capture_device_combobox.removeItem(i)
+                self.capture_device_combobox.addItems([
+                    f"* {device.name}"
+                    + (f" [{device.backend}]" if device.backend else "")
+                    + (" (occupied)" if device.occupied else "")
+                    for device in self.__video_capture_devices])
+                self.capture_device_combobox.setEnabled(True)
+                self.capture_device_combobox.setCurrentIndex(
+                    self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
+            else:
+                self.capture_device_combobox.setPlaceholderText("No device found.")
+        except Exception as exception:  # pylint: disable=broad-except # We really want to catch everything here
+            error = exception
+            self.autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
 
     def __init__(self, autosplit: AutoSplit):
         super().__init__()
@@ -183,7 +187,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
 # region Build the Capture method combobox
         capture_method_values = CAPTURE_METHODS.values()
-        Thread(target=lambda: asyncio.run(self.__set_all_capture_devices())).start()
+        Thread(target=asyncio.run, args=(self.__set_all_capture_devices(),)).start()
         capture_list_items = [
             f"- {method.name} ({method.short_description})"
             for method in capture_method_values
