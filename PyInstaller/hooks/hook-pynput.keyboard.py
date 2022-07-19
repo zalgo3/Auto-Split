@@ -15,4 +15,4 @@ elif sys.platform == "win32":
 else:
     module = "xorg"
 
-hiddenimports = ["pynput.keyboard._{module}"]
+hiddenimports = [f"pynput.keyboard._{module}"]

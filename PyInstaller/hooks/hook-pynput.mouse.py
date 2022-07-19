@@ -15,4 +15,4 @@ elif sys.platform == "win32":
 else:
     module = "xorg"
 
-hiddenimports = ["pynput.mouse._{module}"]
+hiddenimports = [f"pynput.mouse._{module}"]
