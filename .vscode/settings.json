@@ -83,4 +83,5 @@
   "powershell.codeFormatting.useCorrectCasing": true,
   "powershell.codeFormatting.whitespaceBetweenParameters": true,
   "powershell.integratedConsole.showOnStartup": false,
+  "terminal.integrated.defaultProfile.linux": "pwsh",
 }

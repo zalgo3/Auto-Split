@@ -8,6 +8,7 @@ $arguments = @(
   '--splash=res/splash.png')
 if ($IsLinux) {
   $arguments += @(
+    # Required on the CI for PyWinCtl
     '--hidden-import pynput.keyboard._xorg',
     '--hidden-import pynput.mouse._xorg')
 }

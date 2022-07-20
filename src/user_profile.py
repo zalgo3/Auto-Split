@@ -127,13 +127,7 @@ def __load_settings_from_file(autosplit: AutoSplit, load_settings_file_path: str
         autosplit.show_error_signal.emit(error_messages.invalid_settings)
         return False
 
-    try:
-        keyboard.unhook_all()
-    except ImportError as error:
-        if not FROZEN:
-            print(error)
-        else:
-            raise
+    keyboard.unhook_all()
     if not autosplit.is_auto_controlled:
         for hotkey, hotkey_name in [(hotkey, f"{hotkey}_hotkey") for hotkey in HOTKEYS]:
             if autosplit.settings_dict[hotkey_name]:

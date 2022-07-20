@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from threading import Thread
 from typing import TYPE_CHECKING, Literal, Optional, Union
@@ -13,8 +14,6 @@ from utils import FROZEN, START_AUTO_SPLITTER_TEXT, is_digit
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
 
-# While not usually recommended, we don't manipulate the mouse, and we don't want the extra delay
-pyautogui.FAILSAFE = False
 
 SET_HOTKEY_TEXT = "Set Hotkey"
 PRESS_A_KEY_TEXT = "Press a key..."
@@ -247,12 +246,9 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
                 getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)
             autosplit.settings_dict[f"{hotkey}_hotkey"] = hotkey_name
             autosplit.after_setting_hotkey_signal.emit()
-        except ImportError as exception:
-            if not FROZEN:
-                print(exception)
-            else:
-                error = exception
-                autosplit.show_error_signal.emit(lambda: exception_traceback(error))
+        except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
+            error = exception
+            autosplit.show_error_signal.emit(lambda: exception_traceback(error))
 
     # Try to remove the previously set hotkey if there is one.
     _unhook(getattr(autosplit, f"{hotkey}_hotkey"))
