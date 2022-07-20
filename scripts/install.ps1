@@ -55,6 +55,6 @@ If ($dev) {
 
 # Only the Pyright job and local devs have node installed
 if (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Pyright') {
-  npm install -g pyright@latest
-  npm list -g pyright
+  npm install --location=global pyright@latest
+  npm list --location=global pyright
 }

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from collections.abc import Callable
 from threading import Thread
 from typing import TYPE_CHECKING, Literal, Optional, Union
@@ -9,7 +8,7 @@ import keyboard
 import pyautogui
 
 from error_messages import exception_traceback
-from utils import FROZEN, START_AUTO_SPLITTER_TEXT, is_digit
+from utils import START_AUTO_SPLITTER_TEXT, is_digit
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit

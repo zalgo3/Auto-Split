@@ -11,7 +11,7 @@ import error_messages
 from capture_method import CAPTURE_METHODS, CaptureMethodEnum, Region, change_capture_method
 from gen import design
 from hotkeys import HOTKEYS, set_hotkey
-from utils import FROZEN, auto_split_directory
+from utils import auto_split_directory
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
