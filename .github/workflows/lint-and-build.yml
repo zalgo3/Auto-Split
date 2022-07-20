@@ -52,8 +52,8 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
-        os: [windows-latest, ubuntu-22.04]
-        # os: [windows-latest]
+        # os: [windows-latest, ubuntu-22.04]
+        os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -68,12 +68,11 @@ jobs:
       - name: Analysing the code with Pylint
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10"]
-        os: [windows-latest]
+        python-version: ["3.9", "3.10"]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -88,19 +87,16 @@ jobs:
       - name: Analysing the code with Flake8
         run: flake8
   Bandit:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.10"]
-        os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements*.txt'
       - run: scripts/install.ps1
