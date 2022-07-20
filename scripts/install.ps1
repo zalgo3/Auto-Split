@@ -37,10 +37,7 @@ ElseIf ($IsLinux) {
 
   If ($env:GITHUB_JOB) {
     # Can't set groups as above on CI
-    Write-Host $Env:USER
-    sudo usermod -a -G 'tty,input' $Env:USER
-    sudo loginctl terminate-user $Env:USER
-    pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
+    sudo pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
   }
   Else {
     pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
