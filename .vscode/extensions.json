@@ -6,10 +6,13 @@
     "eamodio.gitlens",
     "ms-python.python",
     "ms-python.vscode-pylance",
+    "ms-vscode.powershell",
     "pkief.material-icon-theme",
     "shardulm94.trailing-spaces",
   ],
   "unwantedRecommendations": [
+    // Must disable in this workspace //
+    //
     // VSCode has implemented an optimized version
     "coenraads.bracket-pair-colorizer",
     "coenraads.bracket-pair-colorizer-2",
@@ -23,5 +26,12 @@
     // Not configurable per workspace, tends to conflict with other linters
     // Use eslint-plugin-sonarjs for JS/TS projects
     "sonarsource.sonarlint-vscode",
+    //
+    // Just don't recommend //
+    //
+    // This is a Git project
+    "johnstoncode.svn-scm",
+    // Prefer using VSCode itself as a text editor
+    "vscodevim.vim",
   ]
 }
