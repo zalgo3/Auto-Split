@@ -19,6 +19,11 @@ If ($IsLinux -and -not $env:GITHUB_JOB) {
   }
 }
 
+# Alias pip3 to pip
+If ($IsMacOS) {
+  pip3 install pip
+}
+
 # Installing Python dependencies
 $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
 pip install wheel --upgrade
@@ -42,6 +47,9 @@ ElseIf ($IsLinux) {
   Else {
     pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
   }
+}
+ElseIf ($IsMacOS) {
+  pip install -r "$PSScriptRoot/requirements$dev-darwin.txt"
 }
 Else {
   pip install -r "$PSScriptRoot/requirements$dev.txt"

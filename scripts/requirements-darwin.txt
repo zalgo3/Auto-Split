@@ -1,0 +1,10 @@
+# Usage: .\scripts\install.bat
+#
+# If you're having issues with the libraries, you might want to first run:
+# pip uninstall -y -r .\scripts\requirements-dev-win32.txt
+#
+# Dependencies
+-r requirements.txt
+# MacOs-only dependencies
+pyobjc # Installing keyboard from HEAD without it results in "ModuleNotFoundError: No module named 'Quartz'"
+scikit-build<0.13.2 # Until we can use more recent versions of opencv-python https://github.com/opencv/opencv-python/pull/637/files
