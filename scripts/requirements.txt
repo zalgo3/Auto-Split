@@ -10,8 +10,8 @@
 # Creating AutoSplit executable with PyInstaller: ./scripts/build.ps1
 #
 # Dependencies:
-numpy>=1.22.0rc1,<1.23 # Type issue
-opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
+numpy>=1.22.0rc1
+# opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
 PyQt6>=6.2.1
 ImageHash
 git+https://github.com/boppreh/keyboard.git#egg=keyboard  # Updated to check for input group instead of root user

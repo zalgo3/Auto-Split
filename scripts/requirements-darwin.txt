@@ -6,5 +6,4 @@
 # Dependencies
 -r requirements.txt
 # MacOs-only dependencies
-pyobjc # Installing keyboard from HEAD without it results in "ModuleNotFoundError: No module named 'Quartz'"
-scikit-build<0.13.2 # Until we can use more recent versions of opencv-python https://github.com/opencv/opencv-python/pull/637/files
+# scikit-build<0.13.2 # Until we can use more recent versions of opencv-python https://github.com/opencv/opencv-python/pull/637/files

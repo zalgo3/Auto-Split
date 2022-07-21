@@ -49,6 +49,8 @@ ElseIf ($IsLinux) {
   }
 }
 ElseIf ($IsMacOS) {
+  # Installing keyboard from HEAD without pyobjc results in "ModuleNotFoundError: No module named 'Quartz'"
+  pip install pyobjc
   pip install -r "$PSScriptRoot/requirements$dev-darwin.txt"
 }
 Else {

@@ -157,7 +157,7 @@ class MacOSWindow(BaseWindow):
         ...
 
     @property
-    def title(self) -> str | None:
+    def title(self) -> str:
         ...
 
     @property

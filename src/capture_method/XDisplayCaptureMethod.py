@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-if sys.platform != "linux":
+if sys.platform != "linux" and sys.platform != "darwin":
     raise OSError()
 
 from typing import TYPE_CHECKING, Optional
@@ -20,17 +20,22 @@ if TYPE_CHECKING:
 
 
 class XDisplayCaptureMethod(ThreadedCaptureMethod):
-    _xdisplay: Optional[str] = ""  # ":0"
+    _xdisplay: Optional[str] = "" if sys.platform == "linux" else None  # ":0"
 
     def _read_action(self, autosplit: AutoSplit):
         if not self.check_selected_region_exists(autosplit):
             return None
-        xdisplay = Display()
-        root = xdisplay.screen().root
-        # pylint: disable=protected-access
-        data = root.translate_coords(autosplit.hwnd, 0, 0)._data
-        offset_x = data["x"]
-        offset_y = data["y"]
+        if sys.platform == "linux":
+            xdisplay = Display()
+            root = xdisplay.screen().root
+            # pylint: disable=protected-access
+            data = root.translate_coords(autosplit.hwnd, 0, 0)._data
+            offset_x = data["x"]
+            offset_y = data["y"]
+        else:
+            offset_x = 0
+            offset_y = 0
+
         # image = window.get_image(selection["x"], selection["y"], selection["width"], selection["height"], 1, 0)
 
         selection = autosplit.settings_dict["capture_region"]

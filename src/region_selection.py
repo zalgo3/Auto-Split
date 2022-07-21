@@ -10,10 +10,12 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
 
-if sys.platform == "linux":
+if sys.platform == "linux" or sys.platform == "darwin":
     import pywinctl
     from Xlib.display import Display
     from Xlib.xobject.drawable import Window
+if sys.platform == "darwin":
+    from AppKit import NSScreen
 
 import error_messages
 from utils import MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
@@ -158,7 +160,7 @@ def select_window(autosplit: AutoSplit):
         _, __, client_width, client_height = win32gui.GetClientRect(hwnd)
         border_width = ceil((window_width - client_width) / 2)
         titlebar_with_border_height = window_height - client_height - border_width
-    else:
+    elif sys.platform == "linux":
         xdisplay = Display()
         window = cast(
             Window,
@@ -169,6 +171,11 @@ def select_window(autosplit: AutoSplit):
         client_width = data["width"]
         border_width = data["border_width"]
         titlebar_with_border_height = border_width
+    else:
+        border_width = 0
+        titlebar_with_border_height = 0
+        client_width = 640
+        client_height = 480
 
     __set_region_values(autosplit,
                         left=border_width,
@@ -198,7 +205,8 @@ def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
     if len(windows) == 0:
         return 0, ""
     window = windows[0]
-    return window.getHandle().id, window.title
+    hwnd = window.getHandle() if sys.platform == "darwin" else window.getHandle().id
+    return hwnd, window.title
 
 
 def align_region(autosplit: AutoSplit):
@@ -338,13 +346,20 @@ class BaseSelectWidget(QtWidgets.QWidget):
                 user32.GetSystemMetrics(SM_YVIRTUALSCREEN),
                 user32.GetSystemMetrics(SM_CXVIRTUALSCREEN),
                 user32.GetSystemMetrics(SM_CYVIRTUALSCREEN))
-        else:
+        elif sys.platform == "linux":
             data = Display().screen().root.get_geometry()._data
             self.setGeometry(
                 data["x"],
                 data["y"],
                 data["width"],
                 data["height"])
+        elif sys.platform == "darwin":
+            size = NSScreen.mainScreen().frame().size
+            self.setGeometry(
+                0,
+                0,
+                size.width,
+                size.height)
         self.setWindowTitle(" ")
         self.setWindowOpacity(0.5)
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)

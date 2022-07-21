@@ -22,13 +22,15 @@ if sys.platform == "win32":
     from capture_method.DesktopDuplicationCaptureMethod import DesktopDuplicationCaptureMethod
     from capture_method.ForceFullContentRenderingCaptureMethod import ForceFullContentRenderingCaptureMethod
     from capture_method.WindowsGraphicsCaptureMethod import WindowsGraphicsCaptureMethod
-if sys.platform == "linux":
+if sys.platform == "linux" or sys.platform == "darwin":
     import pyscreeze
     from PIL import features
 
+    from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
+
+if sys.platform == "linux":
     from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
     from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
-    from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 
 
 if TYPE_CHECKING:
@@ -161,6 +163,15 @@ if sys.platform == "win32":
         ),
         implementation=ForceFullContentRenderingCaptureMethod,
     )
+elif (sys.platform == "linux" or sys.platform == "darwin") and features.check_feature(feature="xcb"):
+    CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
+        name="XDisplay",
+        short_description="fast",
+        description=(
+            "\nUses XDisplay to take screenshots "
+        ),
+        implementation=XDisplayCaptureMethod,
+    )
 elif sys.platform == "linux":
     def test_scrot():
         try:
@@ -171,15 +182,6 @@ elif sys.platform == "linux":
 
     # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
     SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
-    if features.check_feature(feature="xcb"):
-        CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
-            name="XDisplay",
-            short_description="fast",
-            description=(
-                "\nUses XDisplay to take screenshots "
-            ),
-            implementation=XDisplayCaptureMethod,
-        )
     CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
         name="gnome-screenshot",
         short_description="fast, Gnome only",
