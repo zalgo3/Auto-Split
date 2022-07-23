@@ -35,7 +35,7 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
     last_captured_frame: Optional[cv2.Mat] = None
 
     def __init__(self, autosplit: AutoSplit):
-        if not self.check_selected_region_exists(autosplit):
+        if not is_valid_hwnd(autosplit.hwnd):
             return
         # Note: Must create in the same thread (can't use a global) otherwise when ran from LiveSplit it will raise:
         # OSError: The application called an interface that was marshalled for a different thread
@@ -87,7 +87,9 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
     def get_frame(self, autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
         selection = autosplit.settings_dict["capture_region"]
         # We still need to check the hwnd because WGC will return a blank black image
-        if not self.check_selected_region_exists(autosplit) or not self.frame_pool or not self.session:
+        if not (self.check_selected_region_exists(autosplit)
+                # Only needed for the type-checker
+                and self.frame_pool):
             return None, False
 
         try:
@@ -95,6 +97,8 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
         # Frame pool is closed
         except OSError:
             return None, False
+
+        # We were too fast and the next frame wasn't ready yet
         if not frame:
             return self.last_captured_frame, True
 
@@ -139,3 +143,9 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
                 return False
             raise
         return self.check_selected_region_exists(autosplit)
+
+    def check_selected_region_exists(self, autosplit: AutoSplit):
+        return bool(
+            is_valid_hwnd(autosplit.hwnd)
+            and self.frame_pool
+            and self.session)
