@@ -148,9 +148,9 @@ if sys.platform == "win32":
         implementation=BitBltCaptureMethod,
     )
     if (  # Windows Graphics Capture requires a minimum Windows Build
-        WINDOWS_BUILD_NUMBER < WGC_MIN_BUILD
+        WINDOWS_BUILD_NUMBER >= WGC_MIN_BUILD
         # Our current implementation of Windows Graphics Capture requires at least one CaptureDevice
-        or not test_for_media_capture()
+        and test_for_media_capture()
     ):
         CAPTURE_METHODS[CaptureMethodEnum.WINDOWS_GRAPHICS_CAPTURE] = CaptureMethodInfo(
             name="Windows Graphics Capture",
