@@ -11,7 +11,7 @@
 #
 # Dependencies:
 numpy>=1.21.4 # Python 3.10 support
-# opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
+opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
 PyQt6>=6.2.1
 ImageHash
 git+https://github.com/boppreh/keyboard.git#egg=keyboard  # Updated to check for input group instead of root user

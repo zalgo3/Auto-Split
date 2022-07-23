@@ -22,21 +22,14 @@ This program can be used to automatically start, split, and reset your preferred
 
 ### Compatibility
 
+- Python 3.9+
 - Windows 10 and 11.
+- Linux (Only tested on Ubuntu 22.04)
 
 ### Building
 
-(This is not required for normal use)
-
-- Python 3.9 - 3.10.
-- Microsoft Visual C++ 14.0 or greater may be required to build the executable. Get it with [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-- Node is optional, but required for complete linting (using Pyright).
-- Read [requirements.txt](/scripts/requirements.txt) for more information on how to install, run and build the python code.
-  - Run `./scripts/install.ps1` to install all dependencies.
-  - Run the app directly with `./scripts/start.ps1 [--auto-controlled]`.
-  - Run `./scripts/build.ps1` to build an executable.
-- Recompile resources after modifications by running `./scripts/compile_resources.ps1`.
-- All configured for VSCode, including Run (F5) and Build (Ctrl+Shift+B) commands.
+(This is not required for normal use)  
+Refer to the [build instructions](build%20instructions.md) if you'd like to build the application yourself or run it directly in Python.
 
 ## OPTIONS
 
@@ -157,10 +150,10 @@ If this option is disabled, when the reset hotkey is hit, the reset button is pr
 - Custom thresholds are place between parenthesis `()` in the filename. This value will override the default threshold.
 - Custom pause times are placed between square brackets `[]` in the filename. This value will override the default pause time.
 - Custom delay times are placed between hash signs `##` in the filename. Note that these are in milliseconds. For example, a 10 second split delay would be `#10000#`. You cannot skip or undo splits during split delays.
-- A different comparison method can be specified with their 0-base index between angular brackets `<>`:
-  - `<0>`: L2 Norm
-  - `<1>`: Histogram
-  - `<2>`: Perceptual Hash
+- A different comparison method can be specified with their 0-base index between carets `^^`:
+  - `^0^`: L2 Norm
+  - `^1^`: Histogram
+  - `^2^`: Perceptual Hash
 - Image loop amounts are placed between at symbols `@@` in the filename. For example, a specific image that you want to split 5 times in a row would be `@5@`. The current loop # is conveniently located beneath the current split image.
 - Flags are placed between curly brackets `{}` in the filename. Multiple flags are placed in the same set of curly brackets. Current available flags:
   - `{d}` dummy split image. When matched, it moves to the next image without hitting your split hotkey.

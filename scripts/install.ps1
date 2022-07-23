@@ -21,7 +21,7 @@ If ($IsLinux -and -not $env:GITHUB_JOB) {
 
 # Alias pip3 to pip
 If ($IsMacOS) {
-  pip3 install pip
+  pip3 install pip --upgrade
 }
 
 # Installing Python dependencies
