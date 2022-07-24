@@ -21,6 +21,24 @@ if sys.platform == "win32":
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
+# Environment specifics
+WINDOWS_BUILD_NUMBER = int(version().split(".")[2]) if platform == "win32" else -1
+FIRST_WIN_11_BUILD = 22000
+"""AutoSplit Version number"""
+FROZEN = hasattr(sys, "frozen")
+"""Running from build made by PyInstaller"""
+auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
+"""The directory of either the AutoSplit executable or AutoSplit.py"""
+HWND = str if sys.platform == "darwin" else int
+
+# Shared constants
+# DIRTY_VERSION_EXTENSION = ""
+DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
+"""Set DIRTY_VERSION_EXTENSION to an empty string to generate a clean version number"""
+AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
+START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
+MAXBYTE = 255
+
 
 def decimal(value: Union[int, float]):
     return f"{int(value * 100) / 100:.2f}"
@@ -42,7 +60,7 @@ def is_valid_image(image: Optional[cv2.Mat]) -> TypeGuard[cv2.Mat]:
     return image is not None and bool(image.size)
 
 
-def is_valid_hwnd(hwnd: int):
+def is_valid_hwnd(hwnd: HWND):
     """Validate the hwnd points to a valid window and not the desktop or whatever window obtained with `\"\"`"""
     if not hwnd:
         return False
@@ -91,21 +109,3 @@ def fire_and_forget(func: Callable[..., None]):
         return asyncio.get_event_loop().run_in_executor(None, func, *args, *kwargs)
 
     return wrapped
-
-
-# Environment specifics
-WINDOWS_BUILD_NUMBER = int(version().split(".")[2]) if platform == "win32" else -1
-FIRST_WIN_11_BUILD = 22000
-"""AutoSplit Version number"""
-FROZEN = hasattr(sys, "frozen")
-"""Running from build made by PyInstaller"""
-auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
-"""The directory of either the AutoSplit executable or AutoSplit.py"""
-
-# Shared strings
-# DIRTY_VERSION_EXTENSION = ""
-DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
-"""Set DIRTY_VERSION_EXTENSION to an empty string to generate a clean version number"""
-AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
-START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
-MAXBYTE = 255

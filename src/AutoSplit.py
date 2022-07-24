@@ -30,7 +30,7 @@ from menu_bar import (check_for_updates, get_default_settings_from_ui, open_abou
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from user_profile import DEFAULT_PROFILE
-from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, START_AUTO_SPLITTER_TEXT, WINDOWS_BUILD_NUMBER,
+from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, HWND, START_AUTO_SPLITTER_TEXT, WINDOWS_BUILD_NUMBER,
                    auto_split_directory, decimal, is_valid_image, open_file)
 
 CHECK_FPS_ITERATIONS = 10
@@ -77,9 +77,13 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     undo_split_hotkey: Optional[Callable[[], None]] = None
     pause_hotkey: Optional[Callable[[], None]] = None
 
-    # Initialize a few attributes
-    hwnd = 0
+    hwnd: HWND
     """Window Handle used for Capture Region"""
+    # Initialize a few attributes
+    if sys.platform == "darwin":
+        hwnd = ""
+    else:
+        hwnd = 0
     last_saved_settings = DEFAULT_PROFILE
     similarity = 0.0
     split_image_number = 0
@@ -902,9 +906,16 @@ def seconds_remaining_text(seconds: float):
 
 
 def is_already_running():
-    # When running directly in Python, any AutoSplit process means it's already open
-    # When bundled, we must ignore itself and the splash screen
-    max_processes = 3 if FROZEN else 1
+    if FROZEN:
+        if sys.platform != "darwin":
+            # When bundled, we must ignore itself and the splash screen
+            max_processes = 3
+        else:
+            # Splash screen is not supported on macOS.
+            max_processes = 2
+    else:
+        # When running directly in Python, any AutoSplit process means it's already open
+        max_processes = 1
     process_count = 0
     for process in process_iter():
         if process.name() == "AutoSplit.exe":

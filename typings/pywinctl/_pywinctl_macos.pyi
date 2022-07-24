@@ -37,7 +37,12 @@ def getAllTitles(app: AppKit.NSApplication = ...) -> list[str]:
     ...
 
 
-def getWindowsWithTitle(title, app=..., condition=..., flags=...):
+def getWindowsWithTitle(
+    title: str,
+    app: AppKit.NSApplication | tuple[str, ...] | None = ...,
+    condition: int | None = ...,
+    flags: int | None = ...
+) -> list[MacOSWindow]:
     ...
 
 

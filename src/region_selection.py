@@ -10,15 +10,17 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
 
-if sys.platform == "linux" or sys.platform == "darwin":
+if sys.platform == "linux":
     import pywinctl
     from Xlib.display import Display
     from Xlib.xobject.drawable import Window
 if sys.platform == "darwin":
-    from AppKit import NSScreen
+    import pywinctl  # noqa F811 # TODO: Raise issue
+    # https://github.com/ronaldoussoren/pyobjc/milestone/3
+    from AppKit import NSScreen  # pyright: ignore [reportMissingModuleSource] # pylint: disable=no-name-in-module
 
 import error_messages
-from utils import MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
+from utils import HWND, MAXBYTE, get_window_bounds, is_valid_hwnd, is_valid_image
 
 if sys.platform == "win32":
     import ctypes
@@ -117,13 +119,16 @@ def select_region(autosplit: AutoSplit):
         window_x, window_y, *_ = win32gui.GetWindowRect(hwnd)
         offset_x = window_x - left_bounds
         offset_y = window_y - top_bounds
-    else:
+    elif sys.platform == "linux":
         xdisplay = Display()
         root = xdisplay.screen().root
         # pylint: disable=protected-access
         data = root.translate_coords(autosplit.hwnd, 0, 0)._data
         offset_x = data["x"]
         offset_y = data["y"]
+    else:
+        offset_x = 0
+        offset_y = 0
     __set_region_values(autosplit,
                         left=x - offset_x,
                         top=y - offset_y,
@@ -184,7 +189,7 @@ def select_window(autosplit: AutoSplit):
                         height=client_height - border_width * 2)
 
 
-def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
+def __get_window_from_point(x: int, y: int) -> tuple[HWND, str]:
     if sys.platform == "win32":
         # Grab the window handle from the coordinates selected by the widget
         hwnd = cast(int, win32gui.WindowFromPoint((x, y)))
@@ -203,6 +208,8 @@ def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
                in pywinctl.getWindowsAt(x, y)
                if window.title != GNOME_DESKTOP_ICONS_EXTENSION]
     if len(windows) == 0:
+        if sys.platform == "darwin":
+            return "", ""
         return 0, ""
     window = windows[0]
     hwnd = window.getHandle() if sys.platform == "darwin" else window.getHandle().id
@@ -358,8 +365,8 @@ class BaseSelectWidget(QtWidgets.QWidget):
             self.setGeometry(
                 0,
                 0,
-                size.width,
-                size.height)
+                int(size.width),
+                int(size.height))
         self.setWindowTitle(" ")
         self.setWindowOpacity(0.5)
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)

@@ -22,15 +22,19 @@ if sys.platform == "win32":
     from capture_method.DesktopDuplicationCaptureMethod import DesktopDuplicationCaptureMethod
     from capture_method.ForceFullContentRenderingCaptureMethod import ForceFullContentRenderingCaptureMethod
     from capture_method.WindowsGraphicsCaptureMethod import WindowsGraphicsCaptureMethod
-if sys.platform == "linux" or sys.platform == "darwin":
+
+if sys.platform == "darwin":
+    from capture_method.MacOSScreenCaptureCaptureMethod import MacOSScreenCaptureCaptureMethod
+
+if sys.platform == "linux" or sys.platform == "darwin":  # pylint: disable=consider-using-in # TODO: Raise issue
     import pyscreeze
     from PIL import features
 
-    from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 
 if sys.platform == "linux":
     from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
     from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
+    from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 
 
 if TYPE_CHECKING:
@@ -88,6 +92,7 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     SCROT = "SCROT"
     XDISPLAY = "XDISPLAY"
     GNOME_SCREENSHOT = "GNOME_SCREENSHOT"
+    MAC_OS_SCREEN_CAPTURE = "MAC_OS_SCREEN_CAPTURE"
     VIDEO_CAPTURE_DEVICE = "VIDEO_CAPTURE_DEVICE"
 
 
@@ -163,15 +168,6 @@ if sys.platform == "win32":
         ),
         implementation=ForceFullContentRenderingCaptureMethod,
     )
-elif (sys.platform == "linux" or sys.platform == "darwin") and features.check_feature(feature="xcb"):
-    CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
-        name="XDisplay",
-        short_description="fast",
-        description=(
-            "\nUses XDisplay to take screenshots "
-        ),
-        implementation=XDisplayCaptureMethod,
-    )
 elif sys.platform == "linux":
     def test_scrot():
         try:
@@ -179,6 +175,16 @@ elif sys.platform == "linux":
             return True
         except NotImplementedError:
             return False
+
+    if features.check_feature(feature="xcb"):
+        CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
+            name="XDisplay",
+            short_description="fast",
+            description=(
+                "\nUses XDisplay to take screenshots "
+            ),
+            implementation=XDisplayCaptureMethod,
+        )
 
     # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
     SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
@@ -207,19 +213,30 @@ elif sys.platform == "linux":
             ),
             implementation=ScrotCaptureMethod,
         )
+elif sys.platform == "darwin":  # pylint: disable=confusing-consecutive-elif
+    CAPTURE_METHODS[CaptureMethodEnum.MAC_OS_SCREEN_CAPTURE] = CaptureMethodInfo(
+        name="Screen Capture",
+        short_description="built-in",
+        description=(
+            "\nUses the built-in screencapture utility "
+        ),
+        implementation=MacOSScreenCaptureCaptureMethod,
+    )
 
-CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
-    name="Video Capture Device",
-    short_description="see below",
-    description=(
-        "\nUses a Video Capture Device, like a webcam, virtual cam, or capture card. "
-        "\nYou can select one below. "
-        "\nThere are currently performance issues, but it might be more convenient. "
-        "\nIf you want to use this with OBS' Virtual Camera, use the Virtualcam plugin instead "
-        "\nhttps://obsproject.com/forum/resources/obs-virtualcam.949/."
-    ),
-    implementation=VideoCaptureDeviceCaptureMethod,
-)
+# TODO: Implement for all platforms
+if sys.platform == "win32":
+    CAPTURE_METHODS[CaptureMethodEnum.VIDEO_CAPTURE_DEVICE] = CaptureMethodInfo(
+        name="Video Capture Device",
+        short_description="see below",
+        description=(
+            "\nUses a Video Capture Device, like a webcam, virtual cam, or capture card. "
+            "\nYou can select one below. "
+            "\nThere are currently performance issues, but it might be more convenient. "
+            "\nIf you want to use this with OBS' Virtual Camera, use the Virtualcam plugin instead "
+            "\nhttps://obsproject.com/forum/resources/obs-virtualcam.949/."
+        ),
+        implementation=VideoCaptureDeviceCaptureMethod,
+    )
 
 
 def change_capture_method(selected_capture_method: CaptureMethodEnum, autosplit: AutoSplit):
