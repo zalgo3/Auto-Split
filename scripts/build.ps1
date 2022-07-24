@@ -1,11 +1,16 @@
 & "$PSScriptRoot/compile_resources.ps1"
 
 $arguments = @(
+  '--noconfirm',
   '--windowed',
   '--onefile',
   '--additional-hooks-dir=Pyinstaller/hooks',
-  '--icon=res/icon.ico',
-  '--splash=res/splash.png')
+  '--icon=res/icon.ico')
+if (-not $IsMacOS) {
+  # Splash screen is not supported on macOS.
+  # https://pyinstaller.org/en/stable/usage.html#splash-screen-experimental
+  $arguments += @('--splash=res/splash.png')
+}
 if ($IsLinux) {
   $arguments += @(
     # Required on the CI for PyWinCtl

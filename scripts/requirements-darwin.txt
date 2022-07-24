@@ -6,4 +6,5 @@
 # Dependencies
 -r requirements.txt
 # MacOs-only dependencies
-# scikit-build<0.13.2 # Until we can use more recent versions of opencv-python https://github.com/opencv/opencv-python/pull/637/files
+PyWinCtl
+PyObjC

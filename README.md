@@ -25,6 +25,7 @@ This program can be used to automatically start, split, and reset your preferred
 - Python 3.9+
 - Windows 10 and 11.
 - Linux (Only tested on Ubuntu 22.04)
+- MacOS 10.15+ (Only tested on 11.0.1)
 
 ### Building
 
