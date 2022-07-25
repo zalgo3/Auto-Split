@@ -1,9 +1,0 @@
-# Usage: .\scripts\install.bat
-#
-# If you're having issues with the libraries, you might want to first run:
-# pip uninstall -y -r .\scripts\requirements-dev-win32.txt
-#
-# Dependencies
--r requirements.txt
-# Linux-only dependencies
-xlib
