@@ -9,9 +9,9 @@ import cv2
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtTest import QTest
+from pywinctl import getTopWindowAt
 
 if sys.platform == "linux":
-    import pywinctl
     from Xlib.display import Display
     from Xlib.xobject.drawable import Window
 
@@ -22,7 +22,7 @@ if sys.platform == "win32":
     import ctypes
 
     from win32 import win32gui
-    from win32con import GA_ROOT, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
+    from win32con import SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN
     from winsdk._winrt import initialize_with_window
     from winsdk.windows.foundation import AsyncStatus, IAsyncOperation
     from winsdk.windows.graphics.capture import GraphicsCaptureItem, GraphicsCapturePicker
@@ -101,7 +101,9 @@ def select_region(autosplit: AutoSplit):
         QTest.qWait(1)
     del selector
 
-    hwnd, window_text = __get_window_from_point(x, y)
+    window = getTopWindowAt(x, y)
+    hwnd = window.getHandle().id
+    window_text = window.title
     if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
         return
@@ -143,7 +145,9 @@ def select_window(autosplit: AutoSplit):
         QTest.qWait(1)
     del selector
 
-    hwnd, window_text = __get_window_from_point(x, y)
+    window = getTopWindowAt(x, y)
+    hwnd = window.getHandle().id
+    window_text = window.title
     if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
         return
@@ -159,12 +163,7 @@ def select_window(autosplit: AutoSplit):
         border_width = ceil((window_width - client_width) / 2)
         titlebar_with_border_height = window_height - client_height - border_width
     else:
-        xdisplay = Display()
-        window = cast(
-            Window,
-            xdisplay.create_resource_object("window", autosplit.hwnd))
-        # pylint: disable=protected-access
-        data = window.get_geometry()._data
+        data = cast(Window, window.getHandle()).get_geometry()._data  # pylint: disable=protected-access
         client_height = data["height"]
         client_width = data["width"]
         border_width = data["border_width"]
@@ -175,30 +174,6 @@ def select_window(autosplit: AutoSplit):
                         top=titlebar_with_border_height,
                         width=client_width,
                         height=client_height - border_width * 2)
-
-
-def __get_window_from_point(x: int, y: int) -> tuple[int, str]:
-    if sys.platform == "win32":
-        # Grab the window handle from the coordinates selected by the widget
-        hwnd = cast(int, win32gui.WindowFromPoint((x, y)))
-
-        # Want to pull the parent window from the window handle
-        # By using GetAncestor we are able to get the parent window instead
-        # of the owner window.
-        while win32gui.IsChild(win32gui.GetParent(hwnd), hwnd):
-            hwnd = cast(int, user32.GetAncestor(hwnd, GA_ROOT))
-
-        window_text = win32gui.GetWindowText(hwnd)
-
-        return hwnd, window_text
-
-    windows = [window for window
-               in pywinctl.getWindowsAt(x, y)
-               if window.title != GNOME_DESKTOP_ICONS_EXTENSION]
-    if len(windows) == 0:
-        return 0, ""
-    window = windows[0]
-    return window.getHandle().id, window.title
 
 
 def align_region(autosplit: AutoSplit):

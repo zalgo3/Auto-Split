@@ -6,5 +6,4 @@
 # Dependencies
 -r requirements.txt
 # Linux-only dependencies
-PyWinCtl
 xlib

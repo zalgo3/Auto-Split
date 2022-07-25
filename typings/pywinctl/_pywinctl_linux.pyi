@@ -88,6 +88,10 @@ def getWindowsAt(x: int, y: int) -> list[LinuxWindow]:
     ...
 
 
+def getTopWindowAt(x: int, y: int) -> LinuxWindow:
+    ...
+
+
 class LinuxWindow(BaseWindow):
     def __init__(self, hWnd: Cursor | Drawable | Pixmap | Resource | Fontable | Window | GC | Colormap | Font) -> None:
         ...

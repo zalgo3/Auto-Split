@@ -23,6 +23,7 @@ certifi
 toml
 psutil
 typing-extensions
+git+https://github.com/Avasam/PyWinCtl.git@getTopWindowAt#egg=PyWinCtl # https://github.com/Kalmat/PyWinCtl/pull/22
 #
 # Build and compile resources
 PyInstaller
