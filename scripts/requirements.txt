@@ -10,7 +10,7 @@
 # Creating AutoSplit executable with PyInstaller: ./scripts/build.ps1
 #
 # Dependencies:
-numpy>=1.21.4 # Python 3.10
+numpy>=1.21.4 # Python 3.10 support
 opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
 PyQt6>=6.2.1
 ImageHash
@@ -22,7 +22,6 @@ requests
 certifi
 toml
 psutil
-typing-extensions
 git+https://github.com/Avasam/PyWinCtl.git@getTopWindowAt#egg=PyWinCtl # https://github.com/Kalmat/PyWinCtl/pull/22
 #
 # Build and compile resources

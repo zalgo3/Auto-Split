@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union, cast
 
 import keyboard
 import pyautogui
+from PyQt6 import QtWidgets
 
 from error_messages import exception_traceback
 from utils import START_AUTO_SPLITTER_TEXT, fire_and_forget, is_digit
@@ -208,6 +209,8 @@ def __get_hotkey_action(autosplit: AutoSplit, hotkey: Hotkeys):
 
 def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: str = ""):
     if autosplit.SettingsWidget:
+        # Unfocus all fields
+        cast(QtWidgets.QDialog, autosplit.SettingsWidget).setFocus()
         getattr(autosplit.SettingsWidget, f"set_{hotkey}_hotkey_button").setText(PRESS_A_KEY_TEXT)
 
     # Disable some buttons
@@ -243,10 +246,11 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
             if autosplit.SettingsWidget:
                 getattr(autosplit.SettingsWidget, f"{hotkey}_input").setText(hotkey_name)
             autosplit.settings_dict[f"{hotkey}_hotkey"] = hotkey_name
-            autosplit.after_setting_hotkey_signal.emit()
         except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
             error = exception
             autosplit.show_error_signal.emit(lambda: exception_traceback(error))
+        finally:
+            autosplit.after_setting_hotkey_signal.emit()
 
     # Try to remove the previously set hotkey if there is one.
     _unhook(getattr(autosplit, f"{hotkey}_hotkey"))

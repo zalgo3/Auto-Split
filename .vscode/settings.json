@@ -52,7 +52,11 @@
       // 88, // Black default
       99, // PEP8-17 acceptable max
       120, // Our hard rule
-    ]
+    ],
+    "editor.codeActionsOnSave": {
+      // This removes "unused" imports. https://github.com/microsoft/pylance-release/issues/3091
+      "source.fixAll": false,
+    },
   },
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,

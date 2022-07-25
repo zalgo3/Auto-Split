@@ -4,7 +4,9 @@ https://github.com/boppreh/keyboard/issues/505
 """
 from __future__ import annotations
 
-from typing import Literal, Optional  # noqa Y037
+from typing import Any, Literal, Optional  # noqa Y037
+
+Unknown = Any
 
 KEY_DOWN: Literal["down"]
 KEY_UP: Literal["up"]
