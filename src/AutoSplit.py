@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import asyncio
 import ctypes
 import os
 import signal
@@ -19,13 +20,12 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMes
 
 import error_messages
 import user_profile
-from AutoControlledWorker import AutoControlledWorker
+from auto_control import start_auto_control_loop
 from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
-from menu_bar import (check_for_updates, get_default_settings_from_ui, open_about, open_settings, open_update_checker,
-                      view_help)
+from menu_bar import check_for_updates, get_default_settings_from_ui, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from user_profile import DEFAULT_PROFILE
@@ -64,7 +64,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     # Widgets
     AboutWidget: Optional[about.Ui_AboutAutoSplitWidget] = None
     UpdateCheckerWidget: Optional[update_checker.Ui_UpdateChecker] = None
-    CheckForUpdatesThread: Optional[QtCore.QThread] = None
     SettingsWidget: Optional[settings.Ui_DialogSettings] = None
 
     # Initialize a few attributes
@@ -95,7 +94,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     reset_image: Optional[AutoSplitImage] = None
     split_images: list[AutoSplitImage] = []
     split_image: Optional[AutoSplitImage] = None
-    update_auto_control: Optional[QtCore.QThread] = None
+    auto_control_loop: Optional[asyncio.Future[None]] = None
 
     def __init__(self, parent: Optional[QWidget] = None):  # pylint: disable=too-many-statements
         super().__init__(parent)
@@ -137,7 +136,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.SettingsWidget.skip_split_input.setEnabled(False)
             self.SettingsWidget.undo_split_input.setEnabled(False)
             self.SettingsWidget.pause_input.setEnabled(False)
-
         if self.is_auto_controlled:
             self.start_auto_splitter_button.setEnabled(False)
 
@@ -146,11 +144,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             print(f"{AUTOSPLIT_VERSION}\n{os.getpid()}", flush=True)
 
             # Use and Start the thread that checks for updates from LiveSplit
-            self.update_auto_control = QtCore.QThread()
-            worker = AutoControlledWorker(self)
-            worker.moveToThread(self.update_auto_control)
-            self.update_auto_control.started.connect(worker.run)
-            self.update_auto_control.start()
+            self.auto_control_loop = start_auto_control_loop(self)
 
         # split image folder line edit text
         self.split_image_folder_input.setText("No Folder Selected")
@@ -183,8 +177,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         # connect signals to functions
         self.after_setting_hotkey_signal.connect(lambda: after_setting_hotkey(self))
         self.start_auto_splitter_signal.connect(self.__auto_splitter)
-        self.update_checker_widget_signal.connect(lambda latest_version, check_on_open:
-                                                  open_update_checker(self, latest_version, check_on_open))
         self.load_start_image_signal.connect(self.__load_start_image)
         self.load_start_image_signal[bool].connect(self.__load_start_image)
         self.load_start_image_signal[bool, bool].connect(self.__load_start_image)
@@ -819,8 +811,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
 
         def exit_program():
-            if self.update_auto_control:
-                self.update_auto_control.terminate()
+            if self.auto_control_loop:
+                self.auto_control_loop.cancel()
             if a0 is not None:
                 a0.accept()
             if self.is_auto_controlled:
@@ -828,7 +820,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
                 os.kill(os.getpid(), signal.SIGINT)
             sys.exit()
 
-        # Simulates LiveSplit quitting without asking. See "TODO" at update_auto_control Worker
+        # Simulates LiveSplit quitting without asking. See "TODO" at auto_control_loop Worker
         # This also more gracefully exits LiveSplit
         # Users can still manually save their settings
         if a0 is None:

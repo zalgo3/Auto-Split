@@ -4,7 +4,7 @@ import asyncio
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum, EnumMeta, unique
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, Union, cast
 
 import cv2
 from pygrabber.dshow_graph import FilterGraph
@@ -76,7 +76,21 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
 
 class CaptureMethodDict(OrderedDict[CaptureMethodEnum, CaptureMethodInfo]):
 
+    def get_index(self, capture_method: Union[str, CaptureMethodEnum]):
+        """
+        Returns 0 if the capture_method is invalid or unsupported
+        """
+        try:
+            return list(self.keys()).index(cast(CaptureMethodEnum, capture_method))
+        except ValueError:
+            return 0
+
     def get_method_by_index(self, index: int):
+        """
+        Returns first (default) capture method if the index is invalid.
+
+        Returns `CaptureMethodEnum.NONE` if there are no capture method available.
+        """
         if len(self) <= 0:
             return CaptureMethodEnum.NONE
         if index < 0:

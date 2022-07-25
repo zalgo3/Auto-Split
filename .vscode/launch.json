@@ -8,7 +8,20 @@
       "name": "Python: AutoSplit",
       "type": "python",
       "request": "launch",
+      "preLaunchTask": "Compile resources",
       "program": "src/AutoSplit.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: AutoSplit --auto-controlled",
+      "type": "python",
+      "request": "launch",
+      "preLaunchTask": "Compile resources",
+      "program": "src/AutoSplit.py",
+      "args": [
+        "--auto-controlled"
+      ],
       "console": "integratedTerminal",
       "justMyCode": true
     }

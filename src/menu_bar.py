@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import webbrowser
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from packaging.version import parse as version_parse
@@ -76,35 +76,15 @@ def view_help():
     webbrowser.open("https://github.com/Toufool/Auto-Split#tutorial")
 
 
-class __CheckForUpdatesThread(QtCore.QThread):
-    def __init__(self, autosplit: AutoSplit, check_on_open: bool):
-        super().__init__()
-        self.autosplit = autosplit
-        self.check_on_open = check_on_open
-
-    def run(self):
-        try:
-            response = requests.get("https://api.github.com/repos/Toufool/Auto-Split/releases/latest")
-            latest_version = str(response.json()["name"]).split("v")[1]
-            self.autosplit.update_checker_widget_signal.emit(latest_version, self.check_on_open)
-        except (RequestException, KeyError):
-            if not self.check_on_open:
-                self.autosplit.show_error_signal.emit(error_messages.check_for_updates)
-
-
+@fire_and_forget
 def check_for_updates(autosplit: AutoSplit, check_on_open: bool = False):
-    autosplit.CheckForUpdatesThread = __CheckForUpdatesThread(autosplit, check_on_open)
-    autosplit.CheckForUpdatesThread.start()
-
-
-def get_capture_method_index(capture_method: Union[str, CaptureMethodEnum]):
-    """
-    Returns 0 if the capture_method is invalid or unsupported
-    """
     try:
-        return list(CAPTURE_METHODS.keys()).index(cast(CaptureMethodEnum, capture_method))
-    except ValueError:
-        return 0
+        response = requests.get("https://api.github.com/repos/Toufool/Auto-Split/releases/latest")
+        latest_version = str(response.json()["name"]).split("v")[1]
+        autosplit.update_checker_widget_signal.emit(latest_version, check_on_open)
+    except (RequestException, KeyError):
+        if not check_on_open:
+            autosplit.show_error_signal.emit(error_messages.check_for_updates)
 
 
 class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
@@ -226,7 +206,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.fps_limit_spinbox.setValue(autosplit.settings_dict["fps_limit"])
         self.live_capture_region_checkbox.setChecked(autosplit.settings_dict["live_capture_region"])
         self.capture_method_combobox.setCurrentIndex(
-            get_capture_method_index(autosplit.settings_dict["capture_method"]))
+            CAPTURE_METHODS.get_index(autosplit.settings_dict["capture_method"]))
 
         # Image Settings
         self.default_comparison_method.setCurrentIndex(autosplit.settings_dict["default_comparison_method"])
