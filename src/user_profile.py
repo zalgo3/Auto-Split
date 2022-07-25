@@ -23,6 +23,7 @@ class UserProfileDict(TypedDict):
     undo_split_hotkey: str
     skip_split_hotkey: str
     pause_hotkey: str
+    disable_auto_reset_image_hotkey: str
     fps_limit: int
     live_capture_region: bool
     capture_method: Union[str, CaptureMethodEnum]
@@ -45,6 +46,7 @@ DEFAULT_PROFILE = UserProfileDict(
     undo_split_hotkey="",
     skip_split_hotkey="",
     pause_hotkey="",
+    disable_auto_reset_image_hotkey="",
     fps_limit=60,
     live_capture_region=True,
     capture_method=CAPTURE_METHODS.get_method_by_index(0),

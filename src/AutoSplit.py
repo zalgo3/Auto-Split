@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import asyncio
 import ctypes
 import os
 import signal
 import sys
-from collections.abc import Callable
 from time import time
 from types import FunctionType
 from typing import Optional
@@ -20,13 +20,12 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMes
 
 import error_messages
 import user_profile
-from AutoControlledWorker import AutoControlledWorker
+from auto_control import start_auto_control_loop
 from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
-from menu_bar import (check_for_updates, get_default_settings_from_ui, open_about, open_settings, open_update_checker,
-                      view_help)
+from menu_bar import check_for_updates, get_default_settings_from_ui, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from user_profile import DEFAULT_PROFILE
@@ -66,16 +65,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     # Widgets
     AboutWidget: Optional[about.Ui_AboutAutoSplitWidget] = None
     UpdateCheckerWidget: Optional[update_checker.Ui_UpdateChecker] = None
-    CheckForUpdatesThread: Optional[QtCore.QThread] = None
     SettingsWidget: Optional[settings.Ui_DialogSettings] = None
-
-    # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
-    # and for type safety in both hotkeys.py and settings_file.py
-    split_hotkey: Optional[Callable[[], None]] = None
-    reset_hotkey: Optional[Callable[[], None]] = None
-    skip_split_hotkey: Optional[Callable[[], None]] = None
-    undo_split_hotkey: Optional[Callable[[], None]] = None
-    pause_hotkey: Optional[Callable[[], None]] = None
 
     # Initialize a few attributes
     hwnd = 0
@@ -105,7 +95,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     reset_image: Optional[AutoSplitImage] = None
     split_images: list[AutoSplitImage] = []
     split_image: Optional[AutoSplitImage] = None
-    update_auto_control: Optional[QtCore.QThread] = None
+    auto_control_loop: Optional[asyncio.Future[None]] = None
 
     def __init__(self, parent: Optional[QWidget] = None):  # pylint: disable=too-many-statements
         super().__init__(parent)
@@ -135,6 +125,10 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.width_spinbox.setFont(font)
             self.height_spinbox.setFont(font)
 
+        # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
+        for hotkey in HOTKEYS:
+            setattr(self, f"{hotkey}_hotkey", None)
+
         # Get default values defined in SettingsDialog
         self.settings_dict = get_default_settings_from_ui(self)
         user_profile.load_check_for_updates_on_open(self)
@@ -153,7 +147,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.SettingsWidget.skip_split_input.setEnabled(False)
             self.SettingsWidget.undo_split_input.setEnabled(False)
             self.SettingsWidget.pause_input.setEnabled(False)
-
         if self.is_auto_controlled:
             self.start_auto_splitter_button.setEnabled(False)
 
@@ -162,11 +155,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             print(f"{AUTOSPLIT_VERSION}\n{os.getpid()}", flush=True)
 
             # Use and Start the thread that checks for updates from LiveSplit
-            self.update_auto_control = QtCore.QThread()
-            worker = AutoControlledWorker(self)
-            worker.moveToThread(self.update_auto_control)
-            self.update_auto_control.started.connect(worker.run)
-            self.update_auto_control.start()
+            self.auto_control_loop = start_auto_control_loop(self)
 
         # split image folder line edit text
         self.split_image_folder_input.setText("No Folder Selected")
@@ -199,8 +188,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         # connect signals to functions
         self.after_setting_hotkey_signal.connect(lambda: after_setting_hotkey(self))
         self.start_auto_splitter_signal.connect(self.__auto_splitter)
-        self.update_checker_widget_signal.connect(lambda latest_version, check_on_open:
-                                                  open_update_checker(self, latest_version, check_on_open))
         self.load_start_image_signal.connect(self.__load_start_image)
         self.load_start_image_signal[bool].connect(self.__load_start_image)
         self.load_start_image_signal[bool, bool].connect(self.__load_start_image)
@@ -777,7 +764,9 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
         Checks if we should reset, resets if it's the case, and returns the result
         """
-        if self.reset_image:
+        if self.disable_auto_reset_checkbox.isChecked():
+            self.table_reset_image_live_label.setText("disabled")
+        elif self.reset_image:
             similarity = self.reset_image.compare_with_capture(self, capture)
             threshold = self.reset_image.get_similarity_threshold(self)
 
@@ -833,8 +822,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
 
         def exit_program():
-            if self.update_auto_control:
-                self.update_auto_control.terminate()
+            if self.auto_control_loop:
+                self.auto_control_loop.cancel()
             self.capture_method.close(self)
             if a0 is not None:
                 a0.accept()
@@ -843,7 +832,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
                 os.kill(os.getpid(), signal.SIGINT)
             sys.exit()
 
-        # Simulates LiveSplit quitting without asking. See "TODO" at update_auto_control Worker
+        # Simulates LiveSplit quitting without asking. See "TODO" at auto_control_loop Worker
         # This also more gracefully exits LiveSplit
         # Users can still manually save their settings
         if a0 is None:

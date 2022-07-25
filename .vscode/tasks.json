@@ -37,6 +37,11 @@
   },
   "tasks": [
     {
+      "label": "Compile resources",
+      "type": "shell",
+      "command": "scripts/compile_resources.ps1"
+    },
+    {
       "label": "Build AutoSplit",
       "type": "shell",
       "command": "scripts/build.ps1",
@@ -45,5 +50,5 @@
         "isDefault": true
       }
     }
-  ],
+  ]
 }
