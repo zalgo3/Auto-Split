@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from math import sqrt
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 import cv2
 import imagehash  # https://github.com/JohannesBuchner/imagehash/issues/151
 import numpy as np
-import numpy.typing as npt
 from PIL import Image
 
 from utils import MAXBYTE, is_valid_image
@@ -115,7 +114,7 @@ def check_if_image_has_transparency(image: cv2.Mat):
     if image.shape[2] != 4:
         return False
     # Needs casting for numpy>=1.23 https://github.com/numpy/numpy/issues/20099
-    mean: float = np.mean(cast(npt.ArrayLike, image[:, :, 3]))
+    mean: float = np.mean(cast(Any, image[:, :, 3]))
     if mean == 0:
         # Non-transparent images code path is usually faster and simpler, so let's return that
         return False
