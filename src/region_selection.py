@@ -102,7 +102,7 @@ def select_region(autosplit: AutoSplit):
     del selector
 
     window = getTopWindowAt(x, y)
-    hwnd = window.getHandle().id
+    hwnd = window.getHandle().id if sys.platform == "linux" else window.getHandle()
     window_text = window.title
     if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
@@ -146,7 +146,7 @@ def select_window(autosplit: AutoSplit):
     del selector
 
     window = getTopWindowAt(x, y)
-    hwnd = window.getHandle().id
+    hwnd = window.getHandle().id if sys.platform == "linux" else window.getHandle()
     window_text = window.title
     if not is_valid_hwnd(hwnd) or not window_text:
         error_messages.region()
