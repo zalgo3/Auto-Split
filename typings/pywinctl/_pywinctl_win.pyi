@@ -56,6 +56,10 @@ def getWindowsAt(x: int, y: int) -> list[Win32Window]:
     ...
 
 
+def getTopWindowAt(x: int, y: int) -> Win32Window:
+    ...
+
+
 class Win32Window(BaseWindow):
     def __init__(self, hWnd: int) -> None:
         ...

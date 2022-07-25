@@ -21,6 +21,7 @@ __all__ = [
     "getMousePos",
     "getScreenSize",
     "getWindowsAt",
+    "getTopWindowAt",
     "getWindowsWithTitle",
     "getWorkArea"]
 __version__ = ...
@@ -374,8 +375,8 @@ class _WinWatchDog(threading.Thread):
 if sys.platform == "darwin":
     from ._pywinctl_macos import (MacOSNSWindow, MacOSWindow, checkPermissions, getActiveWindow, getActiveWindowTitle,
                                   getAllAppsNames, getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows,
-                                  getAppsWithName, getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle,
-                                  getWorkArea)
+                                  getAppsWithName, getMousePos, getScreenSize, getTopWindowAt, getWindowsAt,
+                                  getWindowsWithTitle, getWorkArea)
 
     Window = MacOSWindow
     NSWindow = MacOSNSWindow
@@ -383,13 +384,15 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     from ._pywinctl_win import (Win32Window, checkPermissions, getActiveWindow, getActiveWindowTitle, getAllAppsNames,
                                 getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows, getAppsWithName,
-                                getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle, getWorkArea)
+                                getMousePos, getScreenSize, getTopWindowAt, getWindowsAt, getWindowsWithTitle,
+                                getWorkArea)
 
     Window = Win32Window
 
 elif sys.platform == "linux":
     from ._pywinctl_linux import (LinuxWindow, checkPermissions, getActiveWindow, getActiveWindowTitle, getAllAppsNames,
                                   getAllAppsWindowsTitles, getAllScreens, getAllTitles, getAllWindows, getAppsWithName,
-                                  getMousePos, getScreenSize, getWindowsAt, getWindowsWithTitle, getWorkArea)
+                                  getMousePos, getScreenSize, getTopWindowAt, getWindowsAt, getWindowsWithTitle,
+                                  getWorkArea)
 
     Window = LinuxWindow

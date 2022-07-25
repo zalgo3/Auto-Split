@@ -58,7 +58,20 @@ def getAllAppsWindowsTitles() -> dict:
     ...
 
 
-def getWindowsAt(x: int, y: int, app: AppKit.NSApplication = ..., allWindows=...) -> list[MacOSWindow]:
+def getWindowsAt(
+    x: int, y: int,
+    app: AppKit.NSApplication | None = ...,
+    allWindows: list | None = ...
+) -> list[MacOSWindow]:
+    ...
+
+
+def getTopWindowAt(
+    x: int,
+    y: int,
+    app: AppKit.NSApplication | None = ...,
+    allWindows: list | None = ...
+) -> MacOSWindow:
     ...
 
 

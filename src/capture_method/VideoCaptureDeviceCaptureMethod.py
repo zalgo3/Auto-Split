@@ -15,7 +15,14 @@ class VideoCaptureDeviceCaptureMethod(ThreadedCaptureMethod):
     capture_device: cv2.VideoCapture
 
     def _read_action(self, autosplit: AutoSplit):
-        result, image = self.capture_device.read()
+        try:
+            result, image = self.capture_device.read()
+        except cv2.error as error:
+            if error.code != cv2.Error.STS_ERROR:
+                raise
+            # STS_ERROR most likely means the camera is occupied
+            result = False
+            image = None
         return image if result else None
 
     def __init__(self, autosplit: AutoSplit):

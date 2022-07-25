@@ -85,6 +85,7 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     def __hash__(self):
         return self.value.__hash__()
 
+    NONE = ""
     BITBLT = "BITBLT"
     WINDOWS_GRAPHICS_CAPTURE = "WINDOWS_GRAPHICS_CAPTURE"
     PRINTWINDOW_RENDERFULLCONTENT = "PRINTWINDOW_RENDERFULLCONTENT"
@@ -97,13 +98,38 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
 
 
 class CaptureMethodDict(OrderedDict[CaptureMethodEnum, CaptureMethodInfo]):
+
     def get_method_by_index(self, index: int):
+        """
+        Returns the `CaptureMethodEnum` at index.
+        If index is invalid, returns the first `CaptureMethodEnum`.
+
+        Returns `CaptureMethodEnum.NONE` if there's no capture methods.
+        """
+        if len(self) <= 0:
+            return CaptureMethodEnum.NONE
         if index < 0:
             return first(self)
         return list(self.keys())[index]
 
     def get(self, __key: CaptureMethodEnum):
+        """
+        Returns the `CaptureMethodInfo` for `CaptureMethodEnum` if `CaptureMethodEnum` is available,
+        else defaults to the first available `CaptureMethodEnum`.
+
+        Returns the `CaptureMethodInterface` (default) implementation if there's no capture methods.
+        """
+        if __key == CaptureMethodEnum.NONE or len(self) <= 0:
+            return NONE_CAPTURE_METHOD
         return super().get(__key, first(self.values()))
+
+
+NONE_CAPTURE_METHOD = CaptureMethodInfo(
+    name="None",
+    short_description="",
+    description="",
+    implementation=CaptureMethodInterface
+)
 
 
 CAPTURE_METHODS = CaptureMethodDict()
@@ -129,9 +155,9 @@ if sys.platform == "win32":
         implementation=BitBltCaptureMethod,
     )
     if (  # Windows Graphics Capture requires a minimum Windows Build
-        WINDOWS_BUILD_NUMBER < WGC_MIN_BUILD
+        WINDOWS_BUILD_NUMBER >= WGC_MIN_BUILD
         # Our current implementation of Windows Graphics Capture requires at least one CaptureDevice
-        or not test_for_media_capture()
+        and test_for_media_capture()
     ):
         CAPTURE_METHODS[CaptureMethodEnum.WINDOWS_GRAPHICS_CAPTURE] = CaptureMethodInfo(
             name="Windows Graphics Capture",
@@ -282,9 +308,9 @@ async def get_all_video_capture_devices() -> list[CameraInfo]:
         backend = ""
         try:
             # https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#ga023786be1ee68a9105bf2e48c700294d
-            backend = video_capture.getBackendName()
-            video_capture.grab()
-        except cv2.error as error:  # pyright: ignore [reportUnknownVariableType]
+            backend = video_capture.getBackendName()  # STS_ASSERT
+            video_capture.grab()  # STS_ERROR
+        except cv2.error as error:
             return CameraInfo(index, device_name, True, backend) \
                 if error.code in (cv2.Error.STS_ERROR, cv2.Error.STS_ASSERT) \
                 else None
