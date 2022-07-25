@@ -170,7 +170,7 @@ class BaseWindow:
         ...
 
     @property
-    def left(self) -> float | int:
+    def left(self) -> float:
         ...
 
     @left.setter
@@ -178,7 +178,7 @@ class BaseWindow:
         ...
 
     @property
-    def right(self) -> float | int:
+    def right(self) -> float:
         ...
 
     @right.setter
@@ -186,7 +186,7 @@ class BaseWindow:
         ...
 
     @property
-    def top(self) -> float | int:
+    def top(self) -> float:
         ...
 
     @top.setter
@@ -194,7 +194,7 @@ class BaseWindow:
         ...
 
     @property
-    def bottom(self) -> float | int:
+    def bottom(self) -> float:
         ...
 
     @bottom.setter
@@ -274,7 +274,7 @@ class BaseWindow:
         ...
 
     @property
-    def centerx(self) -> float | int:
+    def centerx(self) -> float:
         ...
 
     @centerx.setter
@@ -282,7 +282,7 @@ class BaseWindow:
         ...
 
     @property
-    def centery(self) -> float | int:
+    def centery(self) -> float:
         ...
 
     @centery.setter
@@ -290,7 +290,7 @@ class BaseWindow:
         ...
 
     @property
-    def width(self) -> float | int:
+    def width(self) -> float:
         ...
 
     @width.setter
@@ -298,7 +298,7 @@ class BaseWindow:
         ...
 
     @property
-    def height(self) -> float | int:
+    def height(self) -> float:
         ...
 
     @height.setter
@@ -314,7 +314,7 @@ class BaseWindow:
         ...
 
     @property
-    def area(self) -> float | int:
+    def area(self) -> float:
         ...
 
     @area.setter
