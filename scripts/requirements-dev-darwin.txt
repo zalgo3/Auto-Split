@@ -1,8 +1,0 @@
-# Usage: .\scripts\install.bat
-#
-# If you're having issues with the libraries, you might want to first run:
-# pip uninstall -y -r .\scripts\requirements-dev-darwin.txt
-#
-# Dependencies
--r requirements-dev.txt
--r requirements-darwin.txt

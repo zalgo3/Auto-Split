@@ -38,4 +38,7 @@ git+https://github.com/ranchen421/D3DShot.git#egg=D3DShot ; sys_platform == 'win
 #
 # Linux-only dependencies
 xlib ; sys_platform == 'linux'
+#
+# MacOs-only dependencies
+PyObjC ; sys_platform == 'darwin'
 

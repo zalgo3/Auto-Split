@@ -41,11 +41,6 @@ If ($IsLinux -and $env:GITHUB_JOB) {
   # Can't set groups as above on CI, so we have to rely on root
   sudo pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
-ElseIf ($IsMacOS) {
-  # Installing keyboard from HEAD without pyobjc results in "ModuleNotFoundError: No module named 'Quartz'"
-  pip install pyobjc
-  pip install -r "$PSScriptRoot/requirements$dev-darwin.txt"
-}
 Else {
   pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
