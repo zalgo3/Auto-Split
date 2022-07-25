@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Optional
 
 import cv2
 
+from utils import is_valid_hwnd
+
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
 
@@ -26,10 +28,10 @@ class CaptureMethodInterface():
 
         @return: The image of the region in the window in BGRA format
         """
-        raise NotImplementedError()
+        return None, False
 
     def recover_window(self, captured_window_title: str, autosplit: AutoSplit) -> bool:
-        raise NotImplementedError()
+        return False
 
     def check_selected_region_exists(self, autosplit: AutoSplit) -> bool:
-        raise NotImplementedError()
+        return is_valid_hwnd(autosplit.hwnd)

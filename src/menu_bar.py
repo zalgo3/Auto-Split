@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import webbrowser
-from threading import Thread
 from typing import TYPE_CHECKING, Any, Union, cast
 
 import requests
@@ -14,9 +13,9 @@ import error_messages
 import user_profile
 from capture_method import (CAPTURE_METHODS, CameraInfo, CaptureMethodEnum, change_capture_method,
                             get_all_video_capture_devices)
-from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa: F401
+from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa F401
 from hotkeys import HOTKEYS, Hotkeys, set_hotkey
-from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, WINDOWS_BUILD_NUMBER, decimal
+from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, WINDOWS_BUILD_NUMBER, decimal, fire_and_forget
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -49,6 +48,7 @@ class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
         self.design_window = design_window
         if version_parse(latest_version) > version_parse(AUTOSPLIT_VERSION):
             self.do_not_ask_again_checkbox.setVisible(check_on_open)
+            self.left_button.setFocus()
             self.show()
         elif not check_on_open:
             self.update_status_label.setText("You are on the latest AutoSplit version.")
@@ -152,8 +152,9 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         if self.autosplit.settings_dict["capture_method"] == CaptureMethodEnum.VIDEO_CAPTURE_DEVICE:
             change_capture_method(CaptureMethodEnum.VIDEO_CAPTURE_DEVICE, self.autosplit)
 
-    async def __set_all_capture_devices(self):
-        self.__video_capture_devices = await get_all_video_capture_devices()
+    @fire_and_forget
+    def __set_all_capture_devices(self):
+        self.__video_capture_devices = asyncio.run(get_all_video_capture_devices())
         if len(self.__video_capture_devices) > 0:
             for i in range(self.capture_device_combobox.count()):
                 self.capture_device_combobox.removeItem(i)
@@ -171,6 +172,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
     def __init__(self, autosplit: AutoSplit):
         super().__init__()
         self.setupUi(self)
+        self.autosplit = autosplit
         # Spinbox frame disappears and reappears on Windows 11. It's much cleaner to just disable them.
         # Most likely related: https://bugreports.qt.io/browse/QTBUG-95215?jql=labels%20%3D%20Windows11
         # Arrow buttons tend to move a lot as well
@@ -179,11 +181,12 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
             self.default_similarity_threshold_spinbox.setFrame(False)
             self.default_delay_time_spinbox.setFrame(False)
             self.default_pause_time_spinbox.setFrame(False)
-        self.autosplit = autosplit
+        # Don't autofocus any particular field
+        self.setFocus()
 
 # region Build the Capture method combobox
         capture_method_values = CAPTURE_METHODS.values()
-        Thread(target=lambda: asyncio.run(self.__set_all_capture_devices())).start()
+        self.__set_all_capture_devices()
         capture_list_items = [
             f"- {method.name} ({method.short_description})"
             for method in capture_method_values
@@ -194,7 +197,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         # Assuming all options take 2 lines (except camera and BitBlt which have 1).
         # And all lines take 16 pixels
         # And all separators take 2 pixels
-        doubled_len = 2 * len(capture_method_values)
+        doubled_len = 2 * len(capture_method_values) or 2
         list_view.setMinimumHeight((doubled_len - 2) * 16 + doubled_len)
         list_view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.capture_method_combobox.setView(list_view)

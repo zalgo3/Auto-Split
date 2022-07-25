@@ -12,7 +12,7 @@ import win32ui
 from win32 import win32gui
 
 from capture_method.interface import CaptureMethodInterface
-from utils import get_window_bounds
+from utils import get_window_bounds, is_valid_hwnd
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -24,7 +24,7 @@ PW_RENDERFULLCONTENT = 0x00000002
 class BitBltCaptureMethod(CaptureMethodInterface):
     _render_full_content = False
 
-    def get_frame(self, autosplit: AutoSplit):
+    def get_frame(self, autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
         selection = autosplit.settings_dict["capture_region"]
         hwnd = autosplit.hwnd
         image: Optional[cv2.Mat] = None
@@ -70,11 +70,7 @@ class BitBltCaptureMethod(CaptureMethodInterface):
 
     def recover_window(self, captured_window_title: str, autosplit: AutoSplit):
         hwnd = win32gui.FindWindow(None, captured_window_title)
-        # Don't fallback to desktop or whatever window obtained with ""
-        if not win32gui.IsWindow(hwnd) or not captured_window_title:
+        if not is_valid_hwnd(hwnd):
             return False
         autosplit.hwnd = hwnd
         return self.check_selected_region_exists(autosplit)
-
-    def check_selected_region_exists(self, autosplit: AutoSplit):
-        return bool(win32gui.IsWindow(autosplit.hwnd) and win32gui.GetWindowText(autosplit.hwnd))

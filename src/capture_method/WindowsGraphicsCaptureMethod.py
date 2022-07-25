@@ -14,7 +14,7 @@ from winsdk.windows.graphics.imaging import BitmapBufferAccessMode, SoftwareBitm
 from winsdk.windows.media.capture import MediaCapture
 
 from capture_method.interface import CaptureMethodInterface
-from utils import WINDOWS_BUILD_NUMBER
+from utils import WINDOWS_BUILD_NUMBER, is_valid_hwnd
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -31,7 +31,7 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
 
     def __init__(self, autosplit: AutoSplit):
         super().__init__(autosplit)
-        if not self.check_selected_region_exists(autosplit):
+        if not is_valid_hwnd(autosplit.hwnd):
             return
         # Note: Must create in the same thread (can't use a global) otherwise when ran from LiveSplit it will raise:
         # OSError: The application called an interface that was marshalled for a different thread
@@ -74,14 +74,16 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
                 # OSError: The application called an interface that was marshalled for a different thread
                 # This still seems to close the session and prevent the following hard crash in LiveSplit
                 # pylint: disable=line-too-long
-                # "AutoSplit.exe	<process started at 00:05:37.020 has terminated with 0xc0000409 (EXCEPTION_STACK_BUFFER_OVERRUN)>"  # noqa: E501
+                # "AutoSplit.exe	<process started at 00:05:37.020 has terminated with 0xc0000409 (EXCEPTION_STACK_BUFFER_OVERRUN)>"  # noqa E501
                 pass
             self.session = None
 
     def get_frame(self, autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
         selection = autosplit.settings_dict["capture_region"]
         # We still need to check the hwnd because WGC will return a blank black image
-        if not self.check_selected_region_exists(autosplit) or not self.frame_pool or not self.session:
+        if not (self.check_selected_region_exists(autosplit)
+                # Only needed for the type-checker
+                and self.frame_pool):
             return None, False
 
         try:
@@ -89,6 +91,8 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
         # Frame pool is closed
         except OSError:
             return None, False
+
+        # We were too fast and the next frame wasn't ready yet
         if not frame:
             return self.last_captured_frame, True
 
@@ -121,8 +125,7 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
 
     def recover_window(self, captured_window_title: str, autosplit: AutoSplit):
         hwnd = win32gui.FindWindow(None, captured_window_title)
-        # Don't fallback to desktop or whatever window obtained with ""
-        if not win32gui.IsWindow(hwnd) or not captured_window_title:
+        if not is_valid_hwnd(hwnd):
             return False
         autosplit.hwnd = hwnd
         self.close(autosplit)
@@ -136,4 +139,7 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
         return self.check_selected_region_exists(autosplit)
 
     def check_selected_region_exists(self, autosplit: AutoSplit):
-        return bool(win32gui.IsWindow(autosplit.hwnd) and win32gui.GetWindowText(autosplit.hwnd))
+        return bool(
+            is_valid_hwnd(autosplit.hwnd)
+            and self.frame_pool
+            and self.session)

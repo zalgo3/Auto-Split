@@ -136,10 +136,8 @@ def __load_settings_from_file(autosplit: AutoSplit, load_settings_file_path: str
                 set_hotkey(autosplit, hotkey, cast(str, autosplit.settings_dict[hotkey_name]))
 
     change_capture_method(cast(CaptureMethodEnum, autosplit.settings_dict["capture_method"]), autosplit)
-    if (
-        not autosplit.capture_method.check_selected_region_exists(autosplit)
-        and autosplit.settings_dict["captured_window_title"]
-    ):
+    autosplit.capture_method.recover_window(autosplit.settings_dict["captured_window_title"], autosplit)
+    if not autosplit.capture_method.check_selected_region_exists(autosplit):
         autosplit.live_image.setText("Reload settings after opening"
                                      + f'\n"{autosplit.settings_dict["captured_window_title"]}"'
                                      + "\nto automatically load Capture Region")
@@ -167,12 +165,16 @@ def load_settings_on_open(autosplit: AutoSplit):
         if file.endswith(".toml")]
 
     # Find all .tomls in AutoSplit folder, error if there is not exactly 1
+    error = None
     if len(settings_files) < 1:
-        error_messages.no_settings_file_on_open()
+        error = error_messages.no_settings_file_on_open
+    elif len(settings_files) > 1:
+        error = error_messages.too_many_settings_files_on_open
+    if error:
+        change_capture_method(CAPTURE_METHODS.get_method_by_index(0), autosplit)
+        error()
         return
-    if len(settings_files) > 1:
-        error_messages.too_many_settings_files_on_open()
-        return
+
     load_settings(autosplit, os.path.join(auto_split_directory, settings_files[0]))
 
 
