@@ -22,10 +22,7 @@ If ($IsLinux -and -not $env:GITHUB_JOB) {
 # Installing Python dependencies
 $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
 pip install wheel --upgrade
-If ($IsWindows) {
-  pip install -r "$PSScriptRoot/requirements$dev-win32.txt"
-}
-ElseIf ($IsLinux) {
+If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
     # Required for splash screen
     sudo apt-get install python3-tk
@@ -34,14 +31,10 @@ ElseIf ($IsLinux) {
     # https://wiki.qt.io/Building_Qt_5_from_Git#Libxcb
     sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
-
-  If ($env:GITHUB_JOB) {
-    # Can't set groups as above on CI
-    sudo pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
-  }
-  Else {
-    pip install -r "$PSScriptRoot/requirements$dev-linux.txt"
-  }
+}
+If ($IsLinux -and $env:GITHUB_JOB) {
+  # Can't set groups as above on CI, so we have to rely on root
+  sudo pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 Else {
   pip install -r "$PSScriptRoot/requirements$dev.txt"

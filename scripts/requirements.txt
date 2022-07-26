@@ -12,7 +12,7 @@
 # Dependencies:
 numpy>=1.23 # Updated types
 opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
-PyQt6>=6.2.1
+PyQt6>=6.2.1 # Python 3.10 support
 ImageHash
 git+https://github.com/boppreh/keyboard.git#egg=keyboard  # Updated to check for input group instead of root user
 packaging
@@ -27,3 +27,15 @@ git+https://github.com/Avasam/PyWinCtl.git@getTopWindowAt#egg=PyWinCtl # https:/
 # Build and compile resources
 PyInstaller
 PySide6
+#
+# https://peps.python.org/pep-0508/#environment-markers
+#
+# Windows-only dependencies:
+pygrabber ; sys_platform == 'win32'
+pywin32>=301 ; sys_platform == 'win32'
+winsdk>=v1.0.0b4 ; sys_platform == 'win32'
+git+https://github.com/ranchen421/D3DShot.git#egg=D3DShot ; sys_platform == 'win32' # https://github.com/SerpentAI/D3DShot/issues/44
+#
+# Linux-only dependencies
+xlib ; sys_platform == 'linux'
+

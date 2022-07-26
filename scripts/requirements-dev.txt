@@ -15,10 +15,16 @@ flake8-quotes
 flake8-isort
 pep8-naming
 pylint>=2.13.9 # Respect ignore configuration options with --recursive=y
+#
+# Run `designer.bat` to quickly open the bundled PyQt Designer.
+# Can also be downloaded externally as a non-python package
+qt6-applications
 # Types
 types-requests
 typing-extensions
 #
-# You can comment this out if you don't want to run `designer.bat` to quickly open the bundled PyQt Designer.
-# Can also be downloaded externally as a non-python package
-qt6-applications
+# https://peps.python.org/pep-0508/#environment-markers
+#
+# Windows-only type stubs
+git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs ; sys_platform == 'win32' # https://github.com/kaluluosi/pywin32-stubs/pull/8
+

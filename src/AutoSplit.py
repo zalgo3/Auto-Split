@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import asyncio
 import ctypes
 import os
 import signal
 import sys
-from collections.abc import Callable
 from time import time
 from types import FunctionType
 from typing import Optional
@@ -20,16 +20,14 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMes
 
 import error_messages
 import user_profile
-from AutoControlledWorker import AutoControlledWorker
+from auto_control import start_auto_control_loop
 from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
-from menu_bar import (check_for_updates, get_default_settings_from_ui, open_about, open_settings, open_update_checker,
-                      view_help)
+from menu_bar import check_for_updates, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
-from user_profile import DEFAULT_PROFILE
 from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, START_AUTO_SPLITTER_TEXT, WINDOWS_BUILD_NUMBER,
                    auto_split_directory, decimal, is_valid_image, open_file)
 
@@ -39,7 +37,7 @@ CHECK_FPS_ITERATIONS = 10
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 
-class AutoSplit(QMainWindow, design.Ui_MainWindow):
+class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-instance-attributes
     myappid = f"Toufool.AutoSplit.v{AUTOSPLIT_VERSION}"
     if sys.platform == "win32":
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -66,31 +64,16 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     # Widgets
     AboutWidget: Optional[about.Ui_AboutAutoSplitWidget] = None
     UpdateCheckerWidget: Optional[update_checker.Ui_UpdateChecker] = None
-    CheckForUpdatesThread: Optional[QtCore.QThread] = None
     SettingsWidget: Optional[settings.Ui_DialogSettings] = None
-
-    # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
-    # and for type safety in both hotkeys.py and settings_file.py
-    split_hotkey: Optional[Callable[[], None]] = None
-    reset_hotkey: Optional[Callable[[], None]] = None
-    skip_split_hotkey: Optional[Callable[[], None]] = None
-    undo_split_hotkey: Optional[Callable[[], None]] = None
-    pause_hotkey: Optional[Callable[[], None]] = None
 
     # Initialize a few attributes
     hwnd = 0
     """Window Handle used for Capture Region"""
-    last_saved_settings = DEFAULT_PROFILE
     similarity = 0.0
     split_image_number = 0
     split_images_and_loop_number: list[tuple[AutoSplitImage, int]] = []
     split_groups: list[list[int]] = []
     capture_method = CaptureMethodInterface()
-
-    # Last loaded settings empty and last successful loaded settings file path to None until we try to load them
-    last_loaded_settings = DEFAULT_PROFILE
-    last_successfully_loaded_settings_file_path: Optional[str] = None
-    """For when a file has never loaded, but you successfully "Save File As"."""
 
     # Automatic timer start
     highest_similarity = 0.0
@@ -105,7 +88,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     reset_image: Optional[AutoSplitImage] = None
     split_images: list[AutoSplitImage] = []
     split_image: Optional[AutoSplitImage] = None
-    update_auto_control: Optional[QtCore.QThread] = None
+    auto_control_loop: Optional[asyncio.Future[None]] = None
 
     def __init__(self, parent: Optional[QWidget] = None):  # pylint: disable=too-many-statements
         super().__init__(parent)
@@ -135,24 +118,20 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             self.width_spinbox.setFont(font)
             self.height_spinbox.setFont(font)
 
-        # Get default values defined in SettingsDialog
-        self.settings_dict = get_default_settings_from_ui(self)
+        # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
+        for hotkey in HOTKEYS:
+            setattr(self, f"{hotkey}_hotkey", None)
+
+        # Settings / Profile
+        self.DEFAULT_PROFILE = user_profile.get_default_settings_from_ui(self)  # pylint: disable=invalid-name
+        """Default values defined in SettingsDialog"""
+        self.settings_dict = self.DEFAULT_PROFILE
+        self.last_saved_settings = self.DEFAULT_PROFILE
+        self.last_loaded_settings = self.DEFAULT_PROFILE
+        """Last loaded settings empty and last successful loaded settings file path to None until we try to load them"""
+        self.last_successfully_loaded_settings_file_path: Optional[str] = None
+        """For when a file has never loaded, but you successfully "Save File As"."""
         user_profile.load_check_for_updates_on_open(self)
-
-        self.action_view_help.triggered.connect(view_help)
-        self.action_about.triggered.connect(lambda: open_about(self))
-        self.action_check_for_updates.triggered.connect(lambda: check_for_updates(self))
-        self.action_settings.triggered.connect(lambda: open_settings(self))
-        self.action_save_profile.triggered.connect(lambda: user_profile.save_settings(self))
-        self.action_save_profile_as.triggered.connect(lambda: user_profile.save_settings_as(self))
-        self.action_load_profile.triggered.connect(lambda: user_profile.load_settings(self))
-
-        if self.SettingsWidget:
-            self.SettingsWidget.split_input.setEnabled(False)
-            self.SettingsWidget.reset_input.setEnabled(False)
-            self.SettingsWidget.skip_split_input.setEnabled(False)
-            self.SettingsWidget.undo_split_input.setEnabled(False)
-            self.SettingsWidget.pause_input.setEnabled(False)
 
         if self.is_auto_controlled:
             self.start_auto_splitter_button.setEnabled(False)
@@ -162,14 +141,19 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
             print(f"{AUTOSPLIT_VERSION}\n{os.getpid()}", flush=True)
 
             # Use and Start the thread that checks for updates from LiveSplit
-            self.update_auto_control = QtCore.QThread()
-            worker = AutoControlledWorker(self)
-            worker.moveToThread(self.update_auto_control)
-            self.update_auto_control.started.connect(worker.run)
-            self.update_auto_control.start()
+            self.auto_control_loop = start_auto_control_loop(self)
 
         # split image folder line edit text
         self.split_image_folder_input.setText("No Folder Selected")
+
+        # Connecting menu actions
+        self.action_view_help.triggered.connect(view_help)
+        self.action_about.triggered.connect(lambda: open_about(self))
+        self.action_check_for_updates.triggered.connect(lambda: check_for_updates(self))
+        self.action_settings.triggered.connect(lambda: open_settings(self))
+        self.action_save_profile.triggered.connect(lambda: user_profile.save_settings(self))
+        self.action_save_profile_as.triggered.connect(lambda: user_profile.save_settings_as(self))
+        self.action_load_profile.triggered.connect(lambda: user_profile.load_settings(self))
 
         # Connecting button clicks to functions
         self.browse_button.clicked.connect(self.__browse)
@@ -199,8 +183,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         # connect signals to functions
         self.after_setting_hotkey_signal.connect(lambda: after_setting_hotkey(self))
         self.start_auto_splitter_signal.connect(self.__auto_splitter)
-        self.update_checker_widget_signal.connect(lambda latest_version, check_on_open:
-                                                  open_update_checker(self, latest_version, check_on_open))
         self.load_start_image_signal.connect(self.__load_start_image)
         self.load_start_image_signal[bool].connect(self.__load_start_image)
         self.load_start_image_signal[bool, bool].connect(self.__load_start_image)
@@ -708,6 +690,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         self.previous_image_button.setEnabled(True)
         self.next_image_button.setEnabled(True)
 
+        # TODO: Do we actually need to disable setting new hotkeys once started?
+        # What does this achieve? (See below TODO)
         if self.SettingsWidget:
             for hotkey in HOTKEYS:
                 getattr(self.SettingsWidget, f"set_{hotkey}_hotkey_button").setEnabled(False)
@@ -736,6 +720,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         self.previous_image_button.setEnabled(False)
         self.next_image_button.setEnabled(False)
 
+        # TODO: Do we actually need to disable setting new hotkeys once started?
+        # What does this achieve? (see above TODO)
         if self.SettingsWidget and not self.is_auto_controlled:
             for hotkey in HOTKEYS:
                 getattr(self.SettingsWidget, f"set_{hotkey}_hotkey_button").setEnabled(True)
@@ -778,25 +764,28 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         Checks if we should reset, resets if it's the case, and returns the result
         """
         if self.reset_image:
-            similarity = self.reset_image.compare_with_capture(self, capture)
-            threshold = self.reset_image.get_similarity_threshold(self)
+            if self.settings_dict["enable_auto_reset"]:
+                similarity = self.reset_image.compare_with_capture(self, capture)
+                threshold = self.reset_image.get_similarity_threshold(self)
 
-            paused = time() - self.run_start_time <= self.reset_image.get_pause_time(self)
-            if paused:
-                should_reset = False
-                self.table_reset_image_live_label.setText("paused")
+                paused = time() - self.run_start_time <= self.reset_image.get_pause_time(self)
+                if paused:
+                    should_reset = False
+                    self.table_reset_image_live_label.setText("paused")
+                else:
+                    should_reset = similarity >= threshold
+                    if similarity > self.reset_highest_similarity:
+                        self.reset_highest_similarity = similarity
+                    self.table_reset_image_highest_label.setText(decimal(self.reset_highest_similarity))
+                    self.table_reset_image_live_label.setText(decimal(similarity))
+
+                self.table_reset_image_threshold_label.setText(decimal(threshold))
+
+                if should_reset:
+                    send_command(self, "reset")
+                    self.reset()
             else:
-                should_reset = similarity >= threshold
-                if similarity > self.reset_highest_similarity:
-                    self.reset_highest_similarity = similarity
-                self.table_reset_image_highest_label.setText(decimal(self.reset_highest_similarity))
-                self.table_reset_image_live_label.setText(decimal(similarity))
-
-            self.table_reset_image_threshold_label.setText(decimal(threshold))
-
-            if should_reset:
-                send_command(self, "reset")
-                self.reset()
+                self.table_reset_image_live_label.setText("disabled")
 
         return self.__check_for_reset_state_update_ui()
 
@@ -833,8 +822,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
 
         def exit_program():
-            if self.update_auto_control:
-                self.update_auto_control.terminate()
+            if self.auto_control_loop:
+                self.auto_control_loop.cancel()
             self.capture_method.close(self)
             if a0 is not None:
                 a0.accept()
@@ -843,7 +832,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
                 os.kill(os.getpid(), signal.SIGINT)
             sys.exit()
 
-        # Simulates LiveSplit quitting without asking. See "TODO" at update_auto_control Worker
+        # Simulates LiveSplit quitting without asking. See "TODO" at auto_control_loop Worker
         # This also more gracefully exits LiveSplit
         # Users can still manually save their settings
         if a0 is None:
