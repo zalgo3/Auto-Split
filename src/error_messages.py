@@ -122,7 +122,7 @@ def load_start_image():
 
 
 def stdin_lost():
-    set_text_message("stdin not supported or lost, external control like LiveSplit integration will not work.")
+    set_text_message("stdin not supported, lost or closed, external control like LiveSplit integration will not work.")
 
 
 def already_running():

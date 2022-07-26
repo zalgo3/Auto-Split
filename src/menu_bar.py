@@ -85,6 +85,9 @@ def check_for_updates(autosplit: AutoSplit, check_on_open: bool = False):
     except (RequestException, KeyError):
         if not check_on_open:
             autosplit.show_error_signal.emit(error_messages.check_for_updates)
+    except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
+        error = exception
+        autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
 
 
 class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
@@ -134,20 +137,24 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
     @fire_and_forget
     def __set_all_capture_devices(self):
-        self.__video_capture_devices = asyncio.run(get_all_video_capture_devices())
-        if len(self.__video_capture_devices) > 0:
-            for i in range(self.capture_device_combobox.count()):
-                self.capture_device_combobox.removeItem(i)
-            self.capture_device_combobox.addItems([
-                f"* {device.name}"
-                + (f" [{device.backend}]" if device.backend else "")
-                + (" (occupied)" if device.occupied else "")
-                for device in self.__video_capture_devices])
-            self.capture_device_combobox.setEnabled(True)
-            self.capture_device_combobox.setCurrentIndex(
-                self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
-        else:
-            self.capture_device_combobox.setPlaceholderText("No device found.")
+        try:
+            self.__video_capture_devices = asyncio.run(get_all_video_capture_devices())
+            if len(self.__video_capture_devices) > 0:
+                for i in range(self.capture_device_combobox.count()):
+                    self.capture_device_combobox.removeItem(i)
+                self.capture_device_combobox.addItems([
+                    f"* {device.name}"
+                    + (f" [{device.backend}]" if device.backend else "")
+                    + (" (occupied)" if device.occupied else "")
+                    for device in self.__video_capture_devices])
+                self.capture_device_combobox.setEnabled(True)
+                self.capture_device_combobox.setCurrentIndex(
+                    self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
+            else:
+                self.capture_device_combobox.setPlaceholderText("No device found.")
+        except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
+            error = exception
+            self.autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
 
     def __init__(self, autosplit: AutoSplit):
         super().__init__()
