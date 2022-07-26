@@ -25,7 +25,7 @@ from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, Ima
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
-from menu_bar import check_for_updates, open_about, open_settings, view_help
+from menu_bar import about_qt, about_qt_for_python, check_for_updates, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
 from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, START_AUTO_SPLITTER_TEXT, WINDOWS_BUILD_NUMBER,
@@ -138,11 +138,21 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
         # Connecting menu actions
         self.action_view_help.triggered.connect(view_help)
         self.action_about.triggered.connect(lambda: open_about(self))
+        self.action_about_qt.triggered.connect(lambda: about_qt)
+        self.action_about_qt_for_python.triggered.connect(lambda: about_qt_for_python)
         self.action_check_for_updates.triggered.connect(lambda: check_for_updates(self))
         self.action_settings.triggered.connect(lambda: open_settings(self))
         self.action_save_profile.triggered.connect(lambda: user_profile.save_settings(self))
         self.action_save_profile_as.triggered.connect(lambda: user_profile.save_settings_as(self))
         self.action_load_profile.triggered.connect(lambda: user_profile.load_settings(self))
+
+        # Shortcut context can't be set through the designer because of a bug in pyuic6 that generates invalid code
+        # Email sent to pyqt@riverbankcomputing.com
+        self.action_view_help.setShortcutContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
+        self.action_settings.setShortcutContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
+        self.action_save_profile.setShortcutContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
+        self.action_save_profile_as.setShortcutContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
+        self.action_load_profile.setShortcutContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
 
         # Connecting button clicks to functions
         self.browse_button.clicked.connect(self.__browse)

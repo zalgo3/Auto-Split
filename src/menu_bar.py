@@ -34,7 +34,8 @@ class __AboutWidget(QtWidgets.QWidget, about.Ui_AboutAutoSplitWidget):
 
 
 def open_about(autosplit: AutoSplit):
-    autosplit.AboutWidget = __AboutWidget()
+    if not autosplit.AboutWidget:
+        autosplit.AboutWidget = __AboutWidget()
 
 
 class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
@@ -69,11 +70,20 @@ class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
 
 
 def open_update_checker(autosplit: AutoSplit, latest_version: str, check_on_open: bool):
-    autosplit.UpdateCheckerWidget = __UpdateCheckerWidget(latest_version, autosplit, check_on_open)
+    if not autosplit.UpdateCheckerWidget:
+        autosplit.UpdateCheckerWidget = __UpdateCheckerWidget(latest_version, autosplit, check_on_open)
 
 
 def view_help():
     webbrowser.open("https://github.com/Toufool/Auto-Split#tutorial")
+
+
+def about_qt():
+    webbrowser.open("https://wiki.qt.io/About_Qt")
+
+
+def about_qt_for_python():
+    webbrowser.open("https://wiki.qt.io/Qt_for_Python")
 
 
 @fire_and_forget
@@ -260,4 +270,5 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
 
 def open_settings(autosplit: AutoSplit):
-    autosplit.SettingsWidget = __SettingsWidget(autosplit)
+    if not autosplit.SettingsWidget:
+        autosplit.SettingsWidget = __SettingsWidget(autosplit)
