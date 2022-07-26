@@ -7,10 +7,9 @@ import sys
 from collections.abc import Callable, Iterable
 from platform import version
 from sys import platform
-from typing import Any, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 
 import cv2
-from typing_extensions import TypeGuard
 
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
@@ -20,6 +19,9 @@ if sys.platform == "win32":
 
     from win32 import win32gui
 
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, TypeGuard
+    P = ParamSpec("P")
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
@@ -97,13 +99,15 @@ def get_or_create_eventloop():
         return asyncio.get_event_loop()
 
 
-def fire_and_forget(func: Callable[..., Any]):
+def fire_and_forget(func: Callable[P, Any]) -> Callable[P, asyncio.Future[None]]:
     """
     Runs synchronous function asynchronously without waiting for a response.
     Uses asyncio to avoid a multitude of possible problems with threads.
+
+    Remember to also wrap the function in a try-except to catch any unhandled exceptions!
     """
-    def wrapped(*args: Any, **kwargs: Any):
-        return get_or_create_eventloop().run_in_executor(None, func, *args, *kwargs)
+    def wrapped(*args: P.args, **kwargs: P.kwargs):
+        return get_or_create_eventloop().run_in_executor(None, lambda: func(*args, **kwargs))
 
     return wrapped
 

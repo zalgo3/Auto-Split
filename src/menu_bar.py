@@ -85,6 +85,9 @@ def check_for_updates(autosplit: AutoSplit, check_on_open: bool = False):
     except (RequestException, KeyError):
         if not check_on_open:
             autosplit.show_error_signal.emit(error_messages.check_for_updates)
+    except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
+        error = exception
+        autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
 
 
 class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
@@ -134,20 +137,24 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
     @fire_and_forget
     def __set_all_capture_devices(self):
-        self.__video_capture_devices = asyncio.run(get_all_video_capture_devices())
-        if len(self.__video_capture_devices) > 0:
-            for i in range(self.capture_device_combobox.count()):
-                self.capture_device_combobox.removeItem(i)
-            self.capture_device_combobox.addItems([
-                f"* {device.name}"
-                + (f" [{device.backend}]" if device.backend else "")
-                + (" (occupied)" if device.occupied else "")
-                for device in self.__video_capture_devices])
-            self.capture_device_combobox.setEnabled(True)
-            self.capture_device_combobox.setCurrentIndex(
-                self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
-        else:
-            self.capture_device_combobox.setPlaceholderText("No device found.")
+        try:
+            self.__video_capture_devices = asyncio.run(get_all_video_capture_devices())
+            if len(self.__video_capture_devices) > 0:
+                for i in range(self.capture_device_combobox.count()):
+                    self.capture_device_combobox.removeItem(i)
+                self.capture_device_combobox.addItems([
+                    f"* {device.name}"
+                    + (f" [{device.backend}]" if device.backend else "")
+                    + (" (occupied)" if device.occupied else "")
+                    for device in self.__video_capture_devices])
+                self.capture_device_combobox.setEnabled(True)
+                self.capture_device_combobox.setCurrentIndex(
+                    self.get_capture_device_index(self.autosplit.settings_dict["capture_device_id"]))
+            else:
+                self.capture_device_combobox.setPlaceholderText("No device found.")
+        except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
+            error = exception
+            self.autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
 
     def __init__(self, autosplit: AutoSplit):
         super().__init__()
@@ -197,7 +204,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
             set_hotkey_hotkey_button.clicked.connect(hotkey_connect(hotkey))
             # Make it very clear that hotkeys are not used when auto-controlled
-            if autosplit.is_auto_controlled:
+            if autosplit.is_auto_controlled and hotkey != "toggle_auto_reset_image":
                 set_hotkey_hotkey_button.setEnabled(False)
                 hotkey_input.setEnabled(False)
 
@@ -214,6 +221,7 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.default_delay_time_spinbox.setValue(autosplit.settings_dict["default_delay_time"])
         self.default_pause_time_spinbox.setValue(autosplit.settings_dict["default_pause_time"])
         self.loop_splits_checkbox.setChecked(autosplit.settings_dict["loop_splits"])
+        self.enable_auto_reset_checkbox.setChecked(autosplit.settings_dict["enable_auto_reset"])
 # endregion
 # region Binding
         # Capture Settings
@@ -243,6 +251,9 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.loop_splits_checkbox.stateChanged.connect(lambda: self.__set_value(
             "loop_splits",
             self.loop_splits_checkbox.isChecked()))
+        self.enable_auto_reset_checkbox.stateChanged.connect(lambda: self.__set_value(
+            "enable_auto_reset",
+            self.enable_auto_reset_checkbox.isChecked()))
 # endregion
 
         self.show()
@@ -250,37 +261,3 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
 def open_settings(autosplit: AutoSplit):
     autosplit.SettingsWidget = __SettingsWidget(autosplit)
-
-
-def get_default_settings_from_ui(autosplit: AutoSplit):
-    temp_dialog = QtWidgets.QDialog()
-    default_settings_dialog = settings_ui.Ui_DialogSettings()
-    default_settings_dialog.setupUi(temp_dialog)
-    default_settings: user_profile.UserProfileDict = {
-        "split_hotkey": default_settings_dialog.split_input.text(),
-        "reset_hotkey": default_settings_dialog.reset_input.text(),
-        "undo_split_hotkey": default_settings_dialog.undo_split_input.text(),
-        "skip_split_hotkey": default_settings_dialog.skip_split_input.text(),
-        "pause_hotkey": default_settings_dialog.pause_input.text(),
-        "disable_auto_reset_image_hotkey": default_settings_dialog.disable_auto_reset_image_input.text(),
-        "fps_limit": default_settings_dialog.fps_limit_spinbox.value(),
-        "live_capture_region": default_settings_dialog.live_capture_region_checkbox.isChecked(),
-        "capture_method": CAPTURE_METHODS.get_method_by_index(
-            default_settings_dialog.capture_method_combobox.currentIndex()),
-        "capture_device_id": default_settings_dialog.capture_device_combobox.currentIndex(),
-        "capture_device_name": "",
-        "default_comparison_method": default_settings_dialog.default_comparison_method.currentIndex(),
-        "default_similarity_threshold": default_settings_dialog.default_similarity_threshold_spinbox.value(),
-        "default_delay_time": default_settings_dialog.default_delay_time_spinbox.value(),
-        "default_pause_time": default_settings_dialog.default_pause_time_spinbox.value(),
-        "loop_splits": default_settings_dialog.loop_splits_checkbox.isChecked(),
-        "split_image_directory": autosplit.split_image_folder_input.text(),
-        "captured_window_title": "",
-        "capture_region": {
-            "x": autosplit.x_spinbox.value(),
-            "y": autosplit.y_spinbox.value(),
-            "width": autosplit.width_spinbox.value(),
-            "height": autosplit.height_spinbox.value(),
-        }}
-    del temp_dialog
-    return default_settings
