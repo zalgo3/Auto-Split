@@ -104,12 +104,13 @@ def invalid_settings():
 
 
 def no_settings_file_on_open():
-    set_text_message("No settings file found. One can be loaded on open if placed in the same folder as AutoSplit.exe")
+    set_text_message(
+        "No settings file found. One can be loaded on open if placed in the same folder as the AutoSplit executable")
 
 
 def too_many_settings_files_on_open():
     set_text_message("Too many settings files found. "
-                     + "Only one can be loaded on open if placed in the same folder as AutoSplit.exe")
+                     + "Only one can be loaded on open if placed in the same folder as the AutoSplit executable")
 
 
 def check_for_updates():
@@ -122,7 +123,7 @@ def load_start_image():
 
 
 def stdin_lost():
-    set_text_message("stdin not supported, lost or closed, external control like LiveSplit integration will not work.")
+    set_text_message("stdin not supported or lost, external control like LiveSplit integration will not work.")
 
 
 def already_running():
@@ -133,17 +134,20 @@ def already_running():
         "Ignore")
 
 
-def exception_traceback(message: str, exception: BaseException):
-    set_text_message(
-        message,
-        "\n".join(traceback.format_exception(None, exception, exception.__traceback__)),
-        "Close AutoSplit")
-
-
 CREATE_NEW_ISSUE_MESSAGE = (
     "Please create a New Issue at <a href='https://github.com/Toufool/Auto-Split/issues'>"
     + "github.com/Toufool/Auto-Split/issues</a>, describe what happened, "
     + "and copy & paste the entire error message below")
+
+
+def exception_traceback(exception: BaseException, message: str = ""):
+    if not message:
+        message = "AutoSplit encountered an unhandled exception and will try to recover, " + \
+            f"however, there is no guarantee it will keep working properly. {CREATE_NEW_ISSUE_MESSAGE}"
+    set_text_message(
+        message,
+        "\n".join(traceback.format_exception(None, exception, exception.__traceback__)),
+        "Close AutoSplit")
 
 
 def make_excepthook(autosplit: AutoSplit):
@@ -158,18 +162,15 @@ def make_excepthook(autosplit: AutoSplit):
         ):
             return
         # Whithin LiveSplit excepthook needs to use MainWindow's signals to show errors
-        autosplit.show_error_signal.emit(lambda: exception_traceback(
-            "AutoSplit encountered an unhandled exception and will try to recover, "
-            + f"however, there is no guarantee it will keep working properly. {CREATE_NEW_ISSUE_MESSAGE}",
-            exception))
+        autosplit.show_error_signal.emit(lambda: exception_traceback(exception))
     return excepthook
 
 
 def handle_top_level_exceptions(exception: Exception):
-    message = f"AutoSplit encountered an unrecoverable exception and will now close. {CREATE_NEW_ISSUE_MESSAGE}"
+    message = f"AutoSplit encountered an unrecoverable exception and will likely now close. {CREATE_NEW_ISSUE_MESSAGE}"
     # Print error to console if not running in executable
     if FROZEN:
-        exception_traceback(message, exception)
+        exception_traceback(exception, message)
     else:
         traceback.print_exception(type(exception), exception, exception.__traceback__)
     sys.exit(1)

@@ -20,8 +20,8 @@ PRESS_A_KEY_TEXT = "Press a key..."
 
 
 Commands = Literal["split", "start", "pause", "reset", "skip", "undo"]
-Hotkeys = Literal["split", "reset", "skip_split", "undo_split", "pause", "disable_auto_reset_image"]
-HOTKEYS: list[Hotkeys] = ["split", "reset", "skip_split", "undo_split", "pause", "disable_auto_reset_image"]
+Hotkeys = Literal["split", "reset", "skip_split", "undo_split", "pause", "toggle_auto_reset_image"]
+HOTKEYS: list[Hotkeys] = ["split", "reset", "skip_split", "undo_split", "pause", "toggle_auto_reset_image"]
 
 
 def before_setting_hotkey(autosplit: AutoSplit):
@@ -202,9 +202,13 @@ def __get_hotkey_action(autosplit: AutoSplit, hotkey: Hotkeys):
         return lambda: autosplit.skip_split(True)
     if hotkey == "undo_split":
         return lambda: autosplit.undo_split(True)
-    if hotkey == "disable_auto_reset_image":
-        return lambda: autosplit.disable_auto_reset_checkbox.setChecked(
-            not autosplit.disable_auto_reset_checkbox.isChecked())
+    if hotkey == "toggle_auto_reset_image":
+        def toggle_auto_reset_image():
+            new_value = not autosplit.settings_dict["enable_auto_reset"]
+            autosplit.settings_dict["enable_auto_reset"] = new_value
+            if autosplit.SettingsWidget:
+                autosplit.SettingsWidget.enable_auto_reset_checkbox.setChecked(new_value)
+        return toggle_auto_reset_image
     return getattr(autosplit, f"{hotkey}_signal").emit
 
 # TODO: using getattr/setattr is NOT a good way to go about this. It was only temporarily done to

@@ -10,13 +10,13 @@ from platform import version
 from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 
 import cv2
-from typing_extensions import ParamSpec, TypeGuard
 from win32 import win32gui
 
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeGuard
+    from typing_extensions import ParamSpec, TypeGuard
+    P = ParamSpec("P")
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
@@ -81,9 +81,6 @@ def get_or_create_eventloop():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         return asyncio.get_event_loop()
-
-
-P = ParamSpec("P")
 
 
 def fire_and_forget(func: Callable[P, Any]) -> Callable[P, asyncio.Future[None]]:

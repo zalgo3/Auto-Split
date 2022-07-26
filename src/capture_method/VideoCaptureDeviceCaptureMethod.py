@@ -37,9 +37,9 @@ class VideoCaptureDeviceCaptureMethod(CaptureMethodInterface):
             error = exception
             self.capture_device.release()
             autosplit.show_error_signal.emit(lambda: exception_traceback(
+                error,
                 "AutoSplit encountered an unhandled exception while trying to grab a frame and has stopped capture. "
-                + CREATE_NEW_ISSUE_MESSAGE,
-                error))
+                + CREATE_NEW_ISSUE_MESSAGE))
 
     def __init__(self, autosplit: AutoSplit):
         super().__init__()

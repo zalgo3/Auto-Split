@@ -25,10 +25,9 @@ from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, Ima
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
-from menu_bar import check_for_updates, get_default_settings_from_ui, open_about, open_settings, view_help
+from menu_bar import check_for_updates, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
-from user_profile import DEFAULT_PROFILE
 from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, FROZEN, START_AUTO_SPLITTER_TEXT, WINDOWS_BUILD_NUMBER,
                    auto_split_directory, decimal, is_valid_image)
 
@@ -38,7 +37,7 @@ CHECK_FPS_ITERATIONS = 10
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 
-class AutoSplit(QMainWindow, design.Ui_MainWindow):
+class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-instance-attributes
     myappid = f"Toufool.AutoSplit.v{AUTOSPLIT_VERSION}"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
@@ -69,17 +68,11 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
     # Initialize a few attributes
     hwnd = 0
     """Window Handle used for Capture Region"""
-    last_saved_settings = DEFAULT_PROFILE
     similarity = 0.0
     split_image_number = 0
     split_images_and_loop_number: list[tuple[AutoSplitImage, int]] = []
     split_groups: list[list[int]] = []
     capture_method = CaptureMethodInterface()
-
-    # Last loaded settings empty and last successful loaded settings file path to None until we try to load them
-    last_loaded_settings = DEFAULT_PROFILE
-    last_successfully_loaded_settings_file_path: Optional[str] = None
-    """For when a file has never loaded, but you successfully "Save File As"."""
 
     # Automatic timer start
     highest_similarity = 0.0
@@ -118,24 +111,17 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         for hotkey in HOTKEYS:
             setattr(self, f"{hotkey}_hotkey", None)
 
-        # Get default values defined in SettingsDialog
-        self.settings_dict = get_default_settings_from_ui(self)
+        # Settings / Profile
+        self.DEFAULT_PROFILE = user_profile.get_default_settings_from_ui(self)  # pylint: disable=invalid-name
+        """Default values defined in SettingsDialog"""
+        self.settings_dict = self.DEFAULT_PROFILE
+        self.last_saved_settings = self.DEFAULT_PROFILE
+        self.last_loaded_settings = self.DEFAULT_PROFILE
+        """Last loaded settings empty and last successful loaded settings file path to None until we try to load them"""
+        self.last_successfully_loaded_settings_file_path: Optional[str] = None
+        """For when a file has never loaded, but you successfully "Save File As"."""
         user_profile.load_check_for_updates_on_open(self)
 
-        self.action_view_help.triggered.connect(view_help)
-        self.action_about.triggered.connect(lambda: open_about(self))
-        self.action_check_for_updates.triggered.connect(lambda: check_for_updates(self))
-        self.action_settings.triggered.connect(lambda: open_settings(self))
-        self.action_save_profile.triggered.connect(lambda: user_profile.save_settings(self))
-        self.action_save_profile_as.triggered.connect(lambda: user_profile.save_settings_as(self))
-        self.action_load_profile.triggered.connect(lambda: user_profile.load_settings(self))
-
-        if self.SettingsWidget:
-            self.SettingsWidget.split_input.setEnabled(False)
-            self.SettingsWidget.reset_input.setEnabled(False)
-            self.SettingsWidget.skip_split_input.setEnabled(False)
-            self.SettingsWidget.undo_split_input.setEnabled(False)
-            self.SettingsWidget.pause_input.setEnabled(False)
         if self.is_auto_controlled:
             self.start_auto_splitter_button.setEnabled(False)
 
@@ -148,6 +134,15 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
 
         # split image folder line edit text
         self.split_image_folder_input.setText("No Folder Selected")
+
+        # Connecting menu actions
+        self.action_view_help.triggered.connect(view_help)
+        self.action_about.triggered.connect(lambda: open_about(self))
+        self.action_check_for_updates.triggered.connect(lambda: check_for_updates(self))
+        self.action_settings.triggered.connect(lambda: open_settings(self))
+        self.action_save_profile.triggered.connect(lambda: user_profile.save_settings(self))
+        self.action_save_profile_as.triggered.connect(lambda: user_profile.save_settings_as(self))
+        self.action_load_profile.triggered.connect(lambda: user_profile.load_settings(self))
 
         # Connecting button clicks to functions
         self.browse_button.clicked.connect(self.__browse)
@@ -684,6 +679,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         self.previous_image_button.setEnabled(True)
         self.next_image_button.setEnabled(True)
 
+        # TODO: Do we actually need to disable setting new hotkeys once started?
+        # What does this achieve? (See below TODO)
         if self.SettingsWidget:
             for hotkey in HOTKEYS:
                 getattr(self.SettingsWidget, f"set_{hotkey}_hotkey_button").setEnabled(False)
@@ -712,6 +709,8 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         self.previous_image_button.setEnabled(False)
         self.next_image_button.setEnabled(False)
 
+        # TODO: Do we actually need to disable setting new hotkeys once started?
+        # What does this achieve? (see above TODO)
         if self.SettingsWidget and not self.is_auto_controlled:
             for hotkey in HOTKEYS:
                 getattr(self.SettingsWidget, f"set_{hotkey}_hotkey_button").setEnabled(True)
@@ -753,28 +752,29 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):
         """
         Checks if we should reset, resets if it's the case, and returns the result
         """
-        if self.disable_auto_reset_checkbox.isChecked():
-            self.table_reset_image_live_label.setText("disabled")
-        elif self.reset_image:
-            similarity = self.reset_image.compare_with_capture(self, capture)
-            threshold = self.reset_image.get_similarity_threshold(self)
+        if self.reset_image:
+            if self.settings_dict["enable_auto_reset"]:
+                similarity = self.reset_image.compare_with_capture(self, capture)
+                threshold = self.reset_image.get_similarity_threshold(self)
 
-            paused = time() - self.run_start_time <= self.reset_image.get_pause_time(self)
-            if paused:
-                should_reset = False
-                self.table_reset_image_live_label.setText("paused")
+                paused = time() - self.run_start_time <= self.reset_image.get_pause_time(self)
+                if paused:
+                    should_reset = False
+                    self.table_reset_image_live_label.setText("paused")
+                else:
+                    should_reset = similarity >= threshold
+                    if similarity > self.reset_highest_similarity:
+                        self.reset_highest_similarity = similarity
+                    self.table_reset_image_highest_label.setText(decimal(self.reset_highest_similarity))
+                    self.table_reset_image_live_label.setText(decimal(similarity))
+
+                self.table_reset_image_threshold_label.setText(decimal(threshold))
+
+                if should_reset:
+                    send_command(self, "reset")
+                    self.reset()
             else:
-                should_reset = similarity >= threshold
-                if similarity > self.reset_highest_similarity:
-                    self.reset_highest_similarity = similarity
-                self.table_reset_image_highest_label.setText(decimal(self.reset_highest_similarity))
-                self.table_reset_image_live_label.setText(decimal(similarity))
-
-            self.table_reset_image_threshold_label.setText(decimal(threshold))
-
-            if should_reset:
-                send_command(self, "reset")
-                self.reset()
+                self.table_reset_image_live_label.setText("disabled")
 
         return self.__check_for_reset_state_update_ui()
 
