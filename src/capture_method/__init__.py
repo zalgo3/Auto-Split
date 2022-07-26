@@ -6,7 +6,7 @@ import sys
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum, EnumMeta, unique
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, Union, cast
 
 import cv2
 
@@ -92,12 +92,21 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
 
 class CaptureMethodDict(OrderedDict[CaptureMethodEnum, CaptureMethodInfo]):
 
+    def get_index(self, capture_method: Union[str, CaptureMethodEnum]):
+        """
+        Returns 0 if the capture_method is invalid or unsupported
+        """
+        try:
+            return list(self.keys()).index(cast(CaptureMethodEnum, capture_method))
+        except ValueError:
+            return 0
+
     def get_method_by_index(self, index: int):
         """
         Returns the `CaptureMethodEnum` at index.
-        If index is invalid, returns the first `CaptureMethodEnum`.
+        If index is invalid, returns the first (default) `CaptureMethodEnum`.
 
-        Returns `CaptureMethodEnum.NONE` if there's no capture methods.
+        Returns `CaptureMethodEnum.NONE` if there are no capture methods available.
         """
         if len(self) <= 0:
             return CaptureMethodEnum.NONE

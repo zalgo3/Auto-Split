@@ -7,11 +7,9 @@ import sys
 from collections.abc import Callable, Iterable
 from platform import version
 from sys import platform
-from threading import Thread
-from typing import Any, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 
 import cv2
-from typing_extensions import TypeGuard
 
 from gen.build_number import AUTOSPLIT_BUILD_NUMBER
 
@@ -21,6 +19,9 @@ if sys.platform == "win32":
 
     from win32 import win32gui
 
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, TypeGuard
+    P = ParamSpec("P")
 
 DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
@@ -89,20 +90,24 @@ def open_file(file_path: str):
         subprocess.call([opener, file_path])   # nosec B603
 
 
-def fire_and_forget(func: Callable[..., Any]):
-    """
-    Runs synchronous function asynchronously without waiting for a response
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return asyncio.get_event_loop()
 
-    Uses threads on Windows because `RuntimeError: There is no current event loop in thread 'MainThread'.`
 
-    Uses asyncio on Linux because of a `Segmentation fault (core dumped)`
+def fire_and_forget(func: Callable[P, Any]) -> Callable[P, asyncio.Future[None]]:
     """
-    def wrapped(*args: Any, **kwargs: Any):
-        if sys.platform == "win32":
-            thread = Thread(target=func, args=args, kwargs=kwargs)
-            thread.start()
-            return thread
-        return asyncio.get_event_loop().run_in_executor(None, func, *args, *kwargs)
+    Runs synchronous function asynchronously without waiting for a response.
+    Uses asyncio to avoid a multitude of possible problems with threads.
+
+    Remember to also wrap the function in a try-except to catch any unhandled exceptions!
+    """
+    def wrapped(*args: P.args, **kwargs: P.kwargs):
+        return get_or_create_eventloop().run_in_executor(None, lambda: func(*args, **kwargs))
 
     return wrapped
 
