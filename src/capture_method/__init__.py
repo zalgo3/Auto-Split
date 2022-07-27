@@ -27,7 +27,6 @@ if sys.platform == "linux":
     import pyscreeze
     from PIL import features
 
-    from capture_method.GnomeScreenshotCaptureMethod import GnomeScreenshotCaptureMethod
     from capture_method.ScrotCaptureMethod import ScrotCaptureMethod
     from capture_method.XDisplayCaptureMethod import XDisplayCaptureMethod
 
@@ -87,7 +86,6 @@ class CaptureMethodEnum(Enum, metaclass=CaptureMethodMeta):
     DESKTOP_DUPLICATION = "DESKTOP_DUPLICATION"
     SCROT = "SCROT"
     XDISPLAY = "XDISPLAY"
-    GNOME_SCREENSHOT = "GNOME_SCREENSHOT"
     VIDEO_CAPTURE_DEVICE = "VIDEO_CAPTURE_DEVICE"
 
 
@@ -198,13 +196,6 @@ if sys.platform == "win32":
         implementation=ForceFullContentRenderingCaptureMethod,
     )
 elif sys.platform == "linux" and not IS_WAYLAND:
-    def test_scrot():
-        try:
-            pyscreeze.screenshot()
-            return True
-        except NotImplementedError:
-            return False
-
     if features.check_feature(feature="xcb"):
         CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
             name="XDisplay",
@@ -214,21 +205,20 @@ elif sys.platform == "linux" and not IS_WAYLAND:
             ),
             implementation=XDisplayCaptureMethod,
         )
-    if shutil.which("gnome-screenshot"):
-        CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
-            name="gnome-screenshot",
-            short_description="fast, GNOME only",
-            description=(
-                "\nUses gnome-screenshot to take screenshots. "
-            ),
-            implementation=GnomeScreenshotCaptureMethod,
-        )
+
+    def test_scrot():
+        try:
+            pyscreeze.screenshot()
+            return True
+        except NotImplementedError:
+            return False
+
     if test_scrot():
         # TODO: Investigate solution for Slow Scrot:
         # https://github.com/asweigart/pyscreeze/issues/68
         CAPTURE_METHODS[CaptureMethodEnum.SCROT] = CaptureMethodInfo(
             name="Scrot",
-            short_description="very slow, leaves file artefacts",
+            short_description="very slow, may leave files",
             description=(
                 "\nUses Scrot (SCReenshOT) to take screenshots. "
                 "\nLeaves behind a screenshot file if interrupted. "
