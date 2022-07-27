@@ -28,9 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        # Having to `sudo pip install` breaks Pyright's ability to see the modules
-        # os: [windows-latest, ubuntu-22.04]
-        os: [windows-latest]
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -42,6 +40,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements*.txt'
+      - name: Set user groups for keyboard module
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: sudo usermod -a -G tty,input $USER
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
@@ -64,6 +65,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements*.txt'
+      - name: Set user groups for keyboard module
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: sudo usermod -a -G tty,input $USER
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pylint
@@ -119,6 +123,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+      - name: Set user groups for keyboard module
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: sudo usermod -a -G tty,input $USER
       - run: scripts/install.ps1
         shell: pwsh
       - run: scripts/build.ps1

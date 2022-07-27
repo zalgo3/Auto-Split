@@ -24,6 +24,7 @@ $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
 pip install wheel --upgrade
 If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
+    sudo apt-get update
     # Required for splash screen
     sudo apt-get install python3-tk
     # Helps ensure build machine has the required PyQt6 libraries for all target machines.
