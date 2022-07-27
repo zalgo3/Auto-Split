@@ -23,6 +23,10 @@ Hotkeys = Literal["split", "reset", "skip_split", "undo_split", "pause", "toggle
 HOTKEYS: list[Hotkeys] = ["split", "reset", "skip_split", "undo_split", "pause", "toggle_auto_reset_image"]
 
 
+def remove_all_hotkeys():
+    keyboard.unhook_all()
+
+
 def before_setting_hotkey(autosplit: AutoSplit):
     """
     Do all of these after you click "Set Hotkey" but before you type the hotkey
