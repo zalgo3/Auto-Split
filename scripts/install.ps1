@@ -46,9 +46,3 @@ If ($dev) {
   Write-Host "`n"
   & "$PSScriptRoot/compile_resources.ps1"
 }
-
-# Only the Pyright job and local devs have node installed
-if (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Pyright') {
-  npm install --global pyright@latest
-  npm list --global pyright
-}
