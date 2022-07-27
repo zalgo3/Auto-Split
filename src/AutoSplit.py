@@ -107,16 +107,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
             self.y_spinbox.setFrame(False)
             self.width_spinbox.setFrame(False)
             self.height_spinbox.setFrame(False)
-        # HACK: Spinboxes are too small on Linux and only fit 3 numbers
-        # We should make the spinboxes larger instead to accomodate all platforms
-        # But we're currently lacking the space
-        if sys.platform == "linux":
-            font = self.x_spinbox.font()
-            font.setPointSize(7)
-            self.x_spinbox.setFont(font)
-            self.y_spinbox.setFont(font)
-            self.width_spinbox.setFont(font)
-            self.height_spinbox.setFont(font)
 
         # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
         for hotkey in HOTKEYS:
