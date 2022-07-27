@@ -30,7 +30,6 @@ This program can be used to automatically start, split, and reset your preferred
 
 - Python 3.9 - 3.10.
 - Microsoft Visual C++ 14.0 or greater may be required to build the executable. Get it with [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-- Node is optional, but required for complete linting (using Pyright).
 - Read [requirements.txt](/scripts/requirements.txt) for more information on how to install, run and build the python code.
   - Run `./scripts/install.ps1` to install all dependencies.
   - Run the app directly with `./scripts/start.ps1 [--auto-controlled]`.

@@ -10,6 +10,7 @@ flake8-quotes
 flake8-isort
 pep8-naming
 pylint>=2.13.9 # Respect ignore configuration options with --recursive=y
+pyright
 # Types
 git+https://github.com/Avasam/pywin32-stubs.git#egg=pywin32-stubs  # https://github.com/kaluluosi/pywin32-stubs/pull/8
 types-requests
