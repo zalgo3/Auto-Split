@@ -103,7 +103,7 @@ Refer to the [build instructions](build%20instructions.md) if you'd like to buil
 
 - **XDisplay** (fast, requires xcb)  
     Uses X to take screenshots of the display.  
-- **gnome-screenshot** (fast, Gnome only)
+- **gnome-screenshot** (fast, GNOME only)
     Uses gnome-screenshot to take screenshots.  
 - **Scrot** (very slow, leaves file artefacts)
     Uses Scrot (SCReenshOT) to take screenshots.  

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import shutil
 import sys
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -213,14 +214,15 @@ elif sys.platform == "linux" and not IS_WAYLAND:
             ),
             implementation=XDisplayCaptureMethod,
         )
-    CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
-        name="gnome-screenshot",
-        short_description="fast, Gnome only",
-        description=(
-            "\nUses gnome-screenshot to take screenshots. "
-        ),
-        implementation=GnomeScreenshotCaptureMethod,
-    )
+    if shutil.which("gnome-screenshot"):
+        CAPTURE_METHODS[CaptureMethodEnum.GNOME_SCREENSHOT] = CaptureMethodInfo(
+            name="gnome-screenshot",
+            short_description="fast, GNOME only",
+            description=(
+                "\nUses gnome-screenshot to take screenshots. "
+            ),
+            implementation=GnomeScreenshotCaptureMethod,
+        )
     if test_scrot():
         # TODO: Investigate solution for Slow Scrot:
         # https://github.com/asweigart/pyscreeze/issues/68
