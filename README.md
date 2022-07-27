@@ -20,6 +20,17 @@ This program can be used to automatically start, split, and reset your preferred
 
 - Download the [latest version](/../../releases/latest)
 
+- Linux users must ensure they are in the `tty` and `input` groups and have write access to `/dev/uinput`. You can run the following commands to do so:
+
+  <!-- # https://github.com/boppreh/keyboard/issues/312#issuecomment-1189734564 -->
+  ```shell
+  sudo usermod -a -G tty,input $USER
+  sudo chmod +0666 /dev/uinput
+  loginctl terminate-user $USER
+  ```
+
+  All screen capture method are incompatible with Wayland. Follow [this guide](https://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop) to disable it.
+
 ### Compatibility
 
 - Python 3.9+
@@ -68,6 +79,8 @@ Refer to the [build instructions](build%20instructions.md) if you'd like to buil
 
 #### Capture Method & Capture Device
 
+##### Windows
+
 - **BitBlt** (fastest, least compatible)  
     A good default fast option. But it cannot properly record OpenGL, Hardware Accelerated or Exclusive Fullscreen windows.  
     The smaller the selected region, the more efficient it is.  
@@ -85,6 +98,19 @@ Refer to the [build instructions](build%20instructions.md) if you'd like to buil
 - **Force Full Content Rendering** (very slow, can affect rendering pipeline)  
     Uses BitBlt behind the scene, but passes a special flag to PrintWindow to force rendering the entire desktop.  
     About 10-15x slower than BitBlt based on original window size and can mess up some applications' rendering pipelines.  
+
+##### Linux
+
+- **XDisplay** (fast, requires xcb)  
+    Uses X to take screenshots of the display.  
+- **gnome-screenshot** (fast, Gnome only)
+    Uses gnome-screenshot to take screenshots.  
+- **Scrot** (very slow, leaves file artefacts)
+    Uses Scrot (SCReenshOT) to take screenshots.  
+    Leaves behind a screenshot file if interrupted.  
+
+#### All platforms
+
 - **Video Capture Device**
     Uses a Video Capture Device, like a webcam, virtual cam, or capture card.  
     There are currently performance issues, but it might be more convenient.  

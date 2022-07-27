@@ -120,6 +120,7 @@ FROZEN = hasattr(sys, "frozen")
 """Running from build made by PyInstaller"""
 auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
 """The directory of either the AutoSplit executable or AutoSplit.py"""
+IS_WAYLAND = bool(os.environ.get("WAYLAND_DISPLAY", False))
 
 # Shared strings
 # DIRTY_VERSION_EXTENSION = ""

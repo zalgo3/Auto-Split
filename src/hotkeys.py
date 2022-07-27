@@ -3,6 +3,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal, Optional, Union, cast
 
+# Important note about keyboard:
+# We need to ensure that PyInstaller doesn't import it too early.
+# Atm scoping it to only this module seems to do the trick.
 import keyboard
 import pyautogui
 from PyQt6 import QtWidgets

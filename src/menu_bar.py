@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import webbrowser
 from typing import TYPE_CHECKING, Any, cast
 
@@ -19,6 +20,14 @@ from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, WINDOWS_BUILD_NUMBER, d
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
+
+LINUX_SCREENSHOT_SUPPORT = (
+    "\n\n----------------------------------------------------\n"
+    + "\nNo screenshot utilities used here are compatible with Wayland. Follow this guide to disable it: "
+    + "\nhttps://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop"
+    + '\n"scrot" must be installed to use screenshot functions in Linux. '
+    + "\nRun: sudo apt-get install scrot"
+) if sys.platform == "linux" else ""
 
 
 class __AboutWidget(QtWidgets.QWidget, about.Ui_AboutAutoSplitWidget):
@@ -191,7 +200,9 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
         self.capture_method_combobox.addItems(capture_list_items)
         self.capture_method_combobox.setToolTip("\n\n".join([
             f"{method.name} :\n{method.description}"
-            for method in capture_method_values]))
+            for method in capture_method_values])
+            + LINUX_SCREENSHOT_SUPPORT
+        )
 # endregion
 
         # Hotkeys initial values and bindings

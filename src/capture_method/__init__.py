@@ -12,7 +12,7 @@ import cv2
 
 from capture_method.interface import CaptureMethodInterface
 from capture_method.VideoCaptureDeviceCaptureMethod import VideoCaptureDeviceCaptureMethod
-from utils import WINDOWS_BUILD_NUMBER, first
+from utils import IS_WAYLAND, WINDOWS_BUILD_NUMBER, first
 
 if sys.platform == "win32":
     from pygrabber.dshow_graph import FilterGraph
@@ -196,7 +196,7 @@ if sys.platform == "win32":
         ),
         implementation=ForceFullContentRenderingCaptureMethod,
     )
-elif sys.platform == "linux":
+elif sys.platform == "linux" and not IS_WAYLAND:
     def test_scrot():
         try:
             pyscreeze.screenshot()
@@ -205,13 +205,12 @@ elif sys.platform == "linux":
             return False
 
     # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
-    SCREENSHOT_SHORT_DESCRIPTION = "screenshot using this utility"
     if features.check_feature(feature="xcb"):
         CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
             name="XDisplay",
-            short_description="fast",
+            short_description="fast, requires xcb",
             description=(
-                "\nUses XDisplay to take screenshots "
+                "\nUses X to take screenshots of the display"
             ),
             implementation=XDisplayCaptureMethod,
         )
@@ -232,11 +231,6 @@ elif sys.platform == "linux":
             description=(
                 "\nUses Scrot (SCReenshOT) to take screenshots. "
                 "\nLeaves behind a screenshot file if interrupted. "
-                "\n\n----------------------------------------------------\n"
-                "\nNo screenshot utilities used here are compatible with Wayland. Follow this guide to disable it: "
-                "\nhttps://linuxconfig.org/how-to-enable-disable-wayland-on-ubuntu-22-04-desktop"
-                '\n"scrot" must be installed to use screenshot functions in Linux. '
-                "\nRun: sudo apt-get install scrot"
             ),
             implementation=ScrotCaptureMethod,
         )

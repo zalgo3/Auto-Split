@@ -5,7 +5,7 @@ If ($IsLinux -and -not $env:GITHUB_JOB) {
     Write-Host "User $Env:USER is already part of groups input and tty. No actions taken."
   }
   Else {
-    # https://github.com/boppreh/keyboard/issues/312
+    # https://github.com/boppreh/keyboard/issues/312#issuecomment-1189734564
     Write-Host "User $Env:USER isn't part of groups input and tty. It is required to install the keyboard module."
     sudo usermod -a -G 'tty,input' $Env:USER
     sudo chmod +0666 /dev/uinput
