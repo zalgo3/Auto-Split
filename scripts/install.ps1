@@ -32,13 +32,13 @@ If ($IsLinux) {
     sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
 }
-If ($IsLinux -and $env:GITHUB_JOB) {
-  # Can't set groups as above on CI, so we have to rely on root
-  sudo pip install -r "$PSScriptRoot/requirements$dev.txt"
-}
-Else {
-  pip install -r "$PSScriptRoot/requirements$dev.txt"
-}
+# If ($IsLinux -and $env:GITHUB_JOB) {
+#   # Can't set groups as above on CI, so we have to rely on root
+#   sudo pip install -r "$PSScriptRoot/requirements$dev.txt"
+# }
+# Else {
+pip install -r "$PSScriptRoot/requirements$dev.txt"
+# }
 
 # Don't compile resources on the Build CI job as it'll do so in build script
 If ($dev) {

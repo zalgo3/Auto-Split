@@ -204,7 +204,6 @@ elif sys.platform == "linux" and not IS_WAYLAND:
         except NotImplementedError:
             return False
 
-    # Eventual Wayland compatibility: https://github.com/python-pillow/Pillow/issues/6392
     if features.check_feature(feature="xcb"):
         CAPTURE_METHODS[CaptureMethodEnum.XDISPLAY] = CaptureMethodInfo(
             name="XDisplay",
