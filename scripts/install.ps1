@@ -35,7 +35,7 @@ If ($IsWindows) {
 # Installing Python dependencies
 $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
 # Ensures installation tools are up to date
-python3 -m pip install wheel pip --upgrade
+pip install wheel pip --upgrade
 If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
     sudo apt-get update
@@ -47,10 +47,10 @@ If ($IsLinux) {
     sudo apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
   # Ensure pip is ran with groups permissions set above
-  sudo -s -H -u $Env:USER python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
+  sudo -s -H -u $Env:USER pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 Else {
-  python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
+  pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 
 # Don't compile resources on the Build CI job as it'll do so in build script

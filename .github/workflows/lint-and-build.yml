@@ -30,8 +30,8 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         # FIXME: For some reasons, Pyright can't find imports on ubuntu CI
-        os: [windows-latest, ubuntu-22.04]
-        # os: [windows-latest]
+        # os: [windows-latest, ubuntu-22.04]
+        os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -43,8 +43,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: "scripts/requirements*.txt"
-      - name: Fix GitHub Actions path
-        run: echo /home/runner/.local/bin >>$GITHUB_PATH
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
