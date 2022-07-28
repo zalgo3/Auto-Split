@@ -40,14 +40,14 @@ If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
     sudo apt-get update
     # Required for splash screen
-    sudo apt-get install python3-tk
+    sudo apt-get install -y python3-tk
     # Helps ensure build machine has the required PyQt6 libraries for all target machines.
     # Not everything here is required, but using the documentation from
     # https://wiki.qt.io/Building_Qt_5_from_Git#Libxcb
-    sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+    sudo apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
   # Ensure pip is ran with groups permissions set above
-  sudo -s -u $Env:USER python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
+  sudo -s -H -u $Env:USER python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 Else {
   python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
