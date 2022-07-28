@@ -43,6 +43,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: "scripts/requirements*.txt"
+      - name: Fix GitHub Actions path
+        run: echo /home/runner/.local/bin >>$GITHUB_PATH
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
