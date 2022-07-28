@@ -46,17 +46,15 @@ jobs:
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
-        run: pyright --warnings
+        run: python3 -m pyright --warnings
   Pylint:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      # Pylint is version-sensible and platform sensible
+      # Pylint is version and platform sensible
       matrix:
         python-version: ["3.9", "3.10"]
-        # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
         os: [windows-latest, ubuntu-22.04]
-        # os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -66,12 +64,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: 'scripts/requirements*.txt'
-      - name: Set user groups for keyboard module
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: sudo usermod -a -G tty,input $USER
       - run: scripts/install.ps1
         shell: pwsh
+      # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
+      - name: Analysing the code with Pylint (ubuntu)
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: pylint --reports=y --output-format=colorized --disable=no-name-in-module src/
       - name: Analysing the code with Pylint
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
     runs-on: windows-latest
@@ -127,9 +127,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-      - name: Set user groups for keyboard module
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: sudo usermod -a -G tty,input $USER
       - run: scripts/install.ps1
         shell: pwsh
       - run: scripts/build.ps1

@@ -119,6 +119,8 @@ disable = [
   "unused-import",
   "wrong-import-order",
   "wrong-import-position",
+  # Only reports a single instance. Pyright does a better job anyway
+  "cyclic-import",
   # Doesn't work with local imports
   "import-error",
   # Similar lines in 2 files, doesn't really work
