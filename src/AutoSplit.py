@@ -24,7 +24,7 @@ from auto_control import start_auto_control_loop
 from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
-from hotkeys import HOTKEYS, after_setting_hotkey, send_command
+from hotkeys import HOTKEYS, KEYBOARD_LINUX_ISSUE, after_setting_hotkey, send_command
 from menu_bar import about_qt, about_qt_for_python, check_for_updates, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
@@ -107,16 +107,6 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
             self.y_spinbox.setFrame(False)
             self.width_spinbox.setFrame(False)
             self.height_spinbox.setFrame(False)
-        # HACK: Spinboxes are too small on Linux and only fit 3 numbers
-        # We should make the spinboxes larger instead to accomodate all platforms
-        # But we're currently lacking the space
-        if sys.platform == "linux":
-            font = self.x_spinbox.font()
-            font.setPointSize(7)
-            self.x_spinbox.setFont(font)
-            self.y_spinbox.setFont(font)
-            self.width_spinbox.setFont(font)
-            self.height_spinbox.setFont(font)
 
         # hotkeys need to be initialized to be passed as thread arguments in hotkeys.py
         for hotkey in HOTKEYS:
@@ -921,6 +911,9 @@ def main():
 
         if is_already_running():
             error_messages.already_running()
+
+        if KEYBOARD_LINUX_ISSUE:
+            error_messages.linux_groups()
 
         AutoSplit()
 

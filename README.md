@@ -26,6 +26,10 @@ This program can be used to automatically start, split, and reset your preferred
   ```shell
   sudo usermod -a -G tty,input $USER
   sudo chmod +0666 /dev/uinput
+  echo 'KERNEL=="uinput", TAG+="uaccess""' > /etc/udev/rules.d/50-uinput.rules
+  echo 'SUBSYSTEM=="input", MODE="0666" GROUP="plugdev"' > /etc/udev/rules.d/12-input.rules
+  echo 'SUBSYSTEM=="misc", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
+  echo 'SUBSYSTEM=="tty", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
   loginctl terminate-user $USER
   ```
 
@@ -102,10 +106,8 @@ Refer to the [build instructions](build%20instructions.md) if you'd like to buil
 ##### Linux
 
 - **XDisplay** (fast, requires xcb)  
-    Uses X to take screenshots of the display.  
-- **gnome-screenshot** (fast, Gnome only)
-    Uses gnome-screenshot to take screenshots.  
-- **Scrot** (very slow, leaves file artefacts)
+    Uses X to take screenshots of the display.
+- **Scrot** (very slow, may leave files)
     Uses Scrot (SCReenshOT) to take screenshots.  
     Leaves behind a screenshot file if interrupted.  
 

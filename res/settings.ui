@@ -104,7 +104,7 @@
      <rect>
       <x>6</x>
       <y>49</y>
-      <width>129</width>
+      <width>141</width>
       <height>20</height>
      </rect>
     </property>
@@ -195,7 +195,7 @@
    <widget class="QComboBox" name="default_comparison_method">
     <property name="geometry">
      <rect>
-      <x>167</x>
+      <x>180</x>
       <y>25</y>
       <width>88</width>
       <height>22</height>
@@ -239,7 +239,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      <rect>
       <x>6</x>
       <y>28</y>
-      <width>161</width>
+      <width>171</width>
       <height>16</height>
      </rect>
     </property>
@@ -263,7 +263,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
    <widget class="QDoubleSpinBox" name="default_pause_time_spinbox">
     <property name="geometry">
      <rect>
-      <x>167</x>
+      <x>180</x>
       <y>115</y>
       <width>87</width>
       <height>22</height>
@@ -293,7 +293,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      <rect>
       <x>6</x>
       <y>58</y>
-      <width>151</width>
+      <width>171</width>
       <height>16</height>
      </rect>
     </property>
@@ -304,7 +304,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
    <widget class="QDoubleSpinBox" name="default_similarity_threshold_spinbox">
     <property name="geometry">
      <rect>
-      <x>167</x>
+      <x>180</x>
       <y>55</y>
       <width>52</width>
       <height>22</height>
@@ -334,7 +334,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      <rect>
       <x>6</x>
       <y>143</y>
-      <width>235</width>
+      <width>271</width>
       <height>20</height>
      </rect>
     </property>
@@ -354,7 +354,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
       <x>6</x>
       <y>193</y>
       <width>261</width>
-      <height>61</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="font">
@@ -364,7 +364,10 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      </font>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Custom image settings and flags are set in the &lt;br&gt;&lt;/br&gt; image file name. These will override the default &lt;br&gt;&lt;/br&gt; values. View the &lt;a href=&quot;https://github.com/Toufool/Auto-Split#readme&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;README&lt;/span&gt;&lt;/a&gt; for full details on all &lt;br&gt;&lt;/br&gt; available custom image settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Custom image settings and flags are set in the image file name. These will override the default values. View the &lt;a href=&quot;https://github.com/Toufool/Auto-Split#readme&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;README&lt;/span&gt;&lt;/a&gt; for full details on all available custom image settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="default_delay_time_label">
@@ -383,7 +386,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
    <widget class="QSpinBox" name="default_delay_time_spinbox">
     <property name="geometry">
      <rect>
-      <x>167</x>
+      <x>180</x>
       <y>85</y>
       <width>87</width>
       <height>22</height>
@@ -404,7 +407,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      <rect>
       <x>6</x>
       <y>168</y>
-      <width>151</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>

@@ -16,7 +16,7 @@ PyQt6>=6.2.1 # Python 3.10 support
 ImageHash
 git+https://github.com/boppreh/keyboard.git#egg=keyboard  # Updated to check for input group instead of root user
 packaging
-Pillow
+Pillow>=9.2 # gnome-screeshot checks
 PyAutoGUI
 requests
 certifi

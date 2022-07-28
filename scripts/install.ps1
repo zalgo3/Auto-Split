@@ -9,13 +9,19 @@ If ($IsLinux) {
     Write-Host "User $Env:USER isn't part of groups input and tty. It is required to install the keyboard module."
     sudo usermod -a -G 'tty,input' $Env:USER
     sudo chmod +0666 /dev/uinput
-    Write-Output 'KERNEL=="uinput", TAG+="uaccess""' > /etc/udev/rules.d/50-uinput.rules
-    Write-Output 'SUBSYSTEM=="input", MODE="0666" GROUP="plugdev"' > /etc/udev/rules.d/12-input.rules
-    Write-Output 'SUBSYSTEM=="misc", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
-    Write-Output 'SUBSYSTEM=="tty", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
+    If (-not $env:GITHUB_JOB) {
+      Write-Output 'KERNEL=="uinput", TAG+="uaccess""' > /etc/udev/rules.d/50-uinput.rules
+      Write-Output 'SUBSYSTEM=="input", MODE="0666" GROUP="plugdev"' > /etc/udev/rules.d/12-input.rules
+      Write-Output 'SUBSYSTEM=="misc", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
+      Write-Output 'SUBSYSTEM=="tty", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
+    }
     Write-Host 'You have been added automatically,' `
-      "but still need to manually terminate your session with 'loginctl terminate-user $Env:USER'"
-    Exit
+      "but still need to manually terminate your session with 'loginctl terminate-user $Env:USER'" `
+      'for the changes to take effect outside of this script.'
+    If (-not $env:GITHUB_JOB) {
+      Write-Host -NoNewline 'Press any key to continue...';
+      $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+    }
   }
 }
 
@@ -32,14 +38,12 @@ If ($IsLinux) {
     # https://wiki.qt.io/Building_Qt_5_from_Git#Libxcb
     sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
+  # Ensure pip is ran with groups permissions set above
+  sudo -s -u $Env:USER pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
-# If ($IsLinux -and $env:GITHUB_JOB) {
-#   # Can't set groups as above on CI, so we have to rely on root
-#   sudo pip install -r "$PSScriptRoot/requirements$dev.txt"
-# }
-# Else {
-pip install -r "$PSScriptRoot/requirements$dev.txt"
-# }
+Else {
+  pip install -r "$PSScriptRoot/requirements$dev.txt"
+}
 
 # Don't compile resources on the Build CI job as it'll do so in build script
 If ($dev) {
