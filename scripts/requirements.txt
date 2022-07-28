@@ -5,7 +5,7 @@
 # Usage: ./scripts/install.ps1
 #
 # If you're having issues with the libraries, you might want to first run:
-# pip uninstall -y -r ./scripts/requirements-dev.txt
+# python3 -m pip uninstall -y -r ./scripts/requirements-dev.txt
 #
 # Creating AutoSplit executable with PyInstaller: ./scripts/build.ps1
 #

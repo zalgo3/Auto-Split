@@ -25,9 +25,17 @@ If ($IsLinux) {
   }
 }
 
+# Alias python to python3 on windows
+If ($IsWindows) {
+  $python = (Get-Command python).Source
+  $python3 = "$((Get-Item $python).Directory.FullName)/python3.exe"
+  New-Item -ItemType SymbolicLink -Path $python3 -Target $python -ErrorAction SilentlyContinue
+}
+
 # Installing Python dependencies
 $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
-pip install wheel --upgrade
+# Ensures installation tools are up to date
+python3 -m pip install wheel pip --upgrade
 If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
     sudo apt-get update
@@ -39,14 +47,13 @@ If ($IsLinux) {
     sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
   # Ensure pip is ran with groups permissions set above
-  sudo -s -u $Env:USER pip install -r "$PSScriptRoot/requirements$dev.txt"
+  sudo -s -u $Env:USER python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 Else {
-  pip install -r "$PSScriptRoot/requirements$dev.txt"
+  python3 -m pip install -r "$PSScriptRoot/requirements$dev.txt"
 }
 
 # Don't compile resources on the Build CI job as it'll do so in build script
 If ($dev) {
-  Write-Host "`n"
   & "$PSScriptRoot/compile_resources.ps1"
 }
