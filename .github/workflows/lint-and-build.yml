@@ -30,8 +30,8 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10"]
         # FIXME: For some reasons, Pyright can't find imports on ubuntu CI
-        # os: [windows-latest, ubuntu-22.04]
-        os: [windows-latest]
+        os: [windows-latest, ubuntu-22.04]
+        # os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
-        run: pyright --warnings
+        run: python -m pyright --warnings
   Pylint:
     runs-on: ${{ matrix.os }}
     strategy:
