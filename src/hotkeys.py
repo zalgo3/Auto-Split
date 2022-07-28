@@ -1,17 +1,31 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal, Optional, Union, cast
+
+import pyautogui
+from PyQt6 import QtWidgets
+
+import error_messages
+from utils import START_AUTO_SPLITTER_TEXT, fire_and_forget, is_digit
+
+if sys.platform == "linux":
+    import grp
+    import os
+    groups = {grp.getgrgid(group).gr_name for group in os.getgroups()}
+    KEYBOARD_LINUX_ISSUE = not {"input", "tty"}.issubset(groups)
 
 # Important note about keyboard:
 # We need to ensure that PyInstaller doesn't import it too early.
 # Atm scoping it to only this module seems to do the trick.
-import keyboard
-import pyautogui
-from PyQt6 import QtWidgets
+try:
+    # Uncomment to test
+    # raise ValueError()
+    import keyboard
+except ValueError:
+    KEYBOARD_LINUX_ISSUE = True  # pyright: ignore[reportConstantRedefinition]
 
-from error_messages import exception_traceback
-from utils import START_AUTO_SPLITTER_TEXT, fire_and_forget, is_digit
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -27,7 +41,8 @@ HOTKEYS: list[Hotkeys] = ["split", "reset", "skip_split", "undo_split", "pause",
 
 
 def remove_all_hotkeys():
-    keyboard.unhook_all()
+    if not KEYBOARD_LINUX_ISSUE:
+        keyboard.unhook_all()
 
 
 def before_setting_hotkey(autosplit: AutoSplit):
@@ -222,6 +237,11 @@ def __get_hotkey_action(autosplit: AutoSplit, hotkey: Hotkeys):
 
 
 def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: str = ""):
+    if KEYBOARD_LINUX_ISSUE:
+        if not preselected_hotkey_name:
+            error_messages.linux_groups()
+        return
+
     if autosplit.SettingsWidget:
         # Unfocus all fields
         cast(QtWidgets.QDialog, autosplit.SettingsWidget).setFocus()
@@ -262,7 +282,7 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
             autosplit.settings_dict[f"{hotkey}_hotkey"] = hotkey_name
         except Exception as exception:   # pylint: disable=broad-except # We really want to catch everything here
             error = exception
-            autosplit.show_error_signal.emit(lambda: exception_traceback(error))
+            autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(error))
         finally:
             autosplit.after_setting_hotkey_signal.emit()
 

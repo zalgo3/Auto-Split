@@ -134,6 +134,19 @@ def already_running():
         "Ignore")
 
 
+def linux_groups():
+    set_text_message(
+        "Linux users must ensure they are in the 'tty' and 'input' groups "
+        + "and have write access to '/dev/uinput'. You can run the following commands to do so:",
+        "sudo usermod -a -G tty,input $USER"
+        + "\nsudo chmod +0666 /dev/uinput"
+        + "\necho 'KERNEL==\"uinput\", TAG+=\"uaccess\"' > /etc/udev/rules.d/50-uinput.rules"
+        + "\necho 'SUBSYSTEM==\"input\", MODE=\"0666\" GROUP=\"plugdev\"' > /etc/udev/rules.d/12-input.rules"
+        + "\necho 'SUBSYSTEM==\"misc\", MODE=\"0666\" GROUP=\"plugdev\"' >> /etc/udev/rules.d/12-input.rules"
+        + "\necho 'SUBSYSTEM==\"tty\", MODE=\"0666\" GROUP=\"plugdev\"' >> /etc/udev/rules.d/12-input.rules"
+        + "\nloginctl terminate-user $USER")
+
+
 CREATE_NEW_ISSUE_MESSAGE = (
     "Please create a New Issue at <a href='https://github.com/Toufool/Auto-Split/issues'>"
     + "github.com/Toufool/Auto-Split/issues</a>, describe what happened, "

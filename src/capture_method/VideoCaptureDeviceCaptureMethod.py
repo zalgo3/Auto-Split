@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 import cv2
 
+import error_messages
 from capture_method.interface import ThreadedCaptureMethod
-from error_messages import CREATE_NEW_ISSUE_MESSAGE, exception_traceback
 from utils import is_valid_image
 
 if TYPE_CHECKING:
@@ -27,10 +27,10 @@ class VideoCaptureDeviceCaptureMethod(ThreadedCaptureMethod):
         except Exception as exception:  # pylint: disable=broad-except # We really want to catch everything here
             error = exception
             self.capture_device.release()
-            autosplit.show_error_signal.emit(lambda: exception_traceback(
+            autosplit.show_error_signal.emit(lambda: error_messages.exception_traceback(
                 error,
                 "AutoSplit encountered an unhandled exception while trying to grab a frame and has stopped capture. "
-                + CREATE_NEW_ISSUE_MESSAGE))
+                + error_messages.CREATE_NEW_ISSUE_MESSAGE))
         return image if result else None
 
     def __init__(self, autosplit: AutoSplit):

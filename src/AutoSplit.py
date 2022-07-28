@@ -24,7 +24,7 @@ from auto_control import start_auto_control_loop
 from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
-from hotkeys import HOTKEYS, after_setting_hotkey, send_command
+from hotkeys import HOTKEYS, KEYBOARD_LINUX_ISSUE, after_setting_hotkey, send_command
 from menu_bar import about_qt, about_qt_for_python, check_for_updates, open_about, open_settings, view_help
 from region_selection import align_region, select_region, select_window, validate_before_parsing
 from split_parser import BELOW_FLAG, DUMMY_FLAG, PAUSE_FLAG, parse_and_validate_images
@@ -911,6 +911,9 @@ def main():
 
         if is_already_running():
             error_messages.already_running()
+
+        if KEYBOARD_LINUX_ISSUE:
+            error_messages.linux_groups()
 
         AutoSplit()
 

@@ -26,6 +26,10 @@ This program can be used to automatically start, split, and reset your preferred
   ```shell
   sudo usermod -a -G tty,input $USER
   sudo chmod +0666 /dev/uinput
+  echo 'KERNEL=="uinput", TAG+="uaccess""' > /etc/udev/rules.d/50-uinput.rules
+  echo 'SUBSYSTEM=="input", MODE="0666" GROUP="plugdev"' > /etc/udev/rules.d/12-input.rules
+  echo 'SUBSYSTEM=="misc", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
+  echo 'SUBSYSTEM=="tty", MODE="0666" GROUP="plugdev"' >> /etc/udev/rules.d/12-input.rules
   loginctl terminate-user $USER
   ```
 
