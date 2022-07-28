@@ -42,7 +42,9 @@ jobs:
           cache-dependency-path: 'scripts/requirements*.txt'
       - name: Set user groups for keyboard module
         if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: sudo usermod -a -G tty,input $USER
+        run: |
+          sudo usermod -aG tty,input $USER
+          sudo -s -u $USER bash -c 'whoami && groups'
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright

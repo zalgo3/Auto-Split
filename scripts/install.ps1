@@ -1,5 +1,5 @@
 # Validating user groups on Linux
-If ($IsLinux -and -not $env:GITHUB_JOB) {
+If ($IsLinux) {
   $groups = groups
   if ($groups.Contains('input') -and $groups.Contains('tty')) {
     Write-Host "User $Env:USER is already part of groups input and tty. No actions taken."
