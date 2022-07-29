@@ -46,7 +46,7 @@ jobs:
       - run: scripts/install.ps1
         shell: pwsh
       - name: Analysing the code with Pyright
-        run: python -m pyright --warnings
+        run: pyright --warnings
   Pylint:
     runs-on: ${{ matrix.os }}
     strategy:
