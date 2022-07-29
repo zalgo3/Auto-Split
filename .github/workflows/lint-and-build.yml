@@ -21,6 +21,10 @@ on:
       - '**.py'
       - '**.pyi'
       - '**.ui'
+
+env:
+  GITHUB_BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+
 jobs:
   Pyright:
     runs-on: windows-latest
