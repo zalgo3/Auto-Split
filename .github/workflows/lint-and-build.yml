@@ -29,9 +29,7 @@ jobs:
       # Pyright is version and platform sensible
       matrix:
         python-version: ["3.9", "3.10"]
-        # FIXME: For some reasons, Pyright can't find imports on ubuntu CI
         os: [windows-latest, ubuntu-22.04]
-        # os: [windows-latest]
     steps:
       - name: Checkout ${{ github.repository }}/${{ github.ref }}
         uses: actions/checkout@v3
@@ -67,11 +65,11 @@ jobs:
       - run: scripts/install.ps1
         shell: pwsh
       # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
-      - name: Analysing the code with Pylint (ubuntu)
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: pylint --reports=y --output-format=colorized --disable=no-name-in-module src/
+      # - name: Analysing the code with Pylint (ubuntu)
+      #   if: ${{ matrix.os == 'ubuntu-22.04' }}
+      #   run: pylint --reports=y --output-format=colorized --disable=no-name-in-module src/
       - name: Analysing the code with Pylint
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        # if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
     runs-on: windows-latest

@@ -47,6 +47,8 @@ If ($IsLinux) {
     sudo apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
   }
   # Ensure keyboard is installed with groups permissions set above
+  # This WILL mess up toolings' ability too see this import
+  # https://github.com/boppreh/keyboard/issues/563
   sudo -u $Env:USER pip install 'git+https://github.com/boppreh/keyboard.git#egg=keyboard'
 }
 pip install -r "$PSScriptRoot/requirements$dev.txt"
