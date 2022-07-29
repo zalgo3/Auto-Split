@@ -34,8 +34,8 @@ If ($IsWindows) {
 
 # Installing Python dependencies
 $dev = If ($env:GITHUB_JOB -eq 'Build') { '' } Else { '-dev' }
-# Ensures installation tools are up to date
-pip install wheel pip setuptools --upgrade
+# Ensures installation tools are up to date. This also aliases pip to pip3 on MacOS.
+python3 -m pip install wheel pip setuptools --upgrade
 If ($IsLinux) {
   If (-not $env:GITHUB_JOB -or $env:GITHUB_JOB -eq 'Build') {
     sudo apt-get update

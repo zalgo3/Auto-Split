@@ -24,7 +24,9 @@ if sys.platform == "linux":
     try:
         # Uncomment to test
         # raise ValueError()
-        import keyboard  # pyright: ignore[reportMissingModuleSource] https://github.com/boppreh/keyboard/issues/563
+        # https://github.com/boppreh/keyboard/issues/563
+        # pyright: reportMissingModuleSource=false
+        import keyboard
     except ValueError:
         KEYBOARD_LINUX_ISSUE = True  # pyright: ignore[reportConstantRedefinition]
 else:

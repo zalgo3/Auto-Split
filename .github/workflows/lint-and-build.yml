@@ -65,11 +65,11 @@ jobs:
       - run: scripts/install.ps1
         shell: pwsh
       # FIXME: For some reasons, Pylint can't see PyQt6 modules on ubuntu
-      # - name: Analysing the code with Pylint (ubuntu)
-      #   if: ${{ matrix.os == 'ubuntu-22.04' }}
-      #   run: pylint --reports=y --output-format=colorized --disable=no-name-in-module src/
+      - name: Analysing the code with Pylint (ubuntu)
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: pylint --reports=y --output-format=colorized --disable=no-name-in-module src/
       - name: Analysing the code with Pylint
-        # if: ${{ matrix.os != 'ubuntu-22.04' }}
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: pylint --reports=y --output-format=colorized src/
   Flake8:
     runs-on: windows-latest
