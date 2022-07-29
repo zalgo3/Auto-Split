@@ -9,8 +9,13 @@ pyuic6 './res/update_checker.ui' -o './src/gen/update_checker.py'
 pyside6-rcc './res/resources.qrc' -o './src/gen/resources_rc.py'
 Write-Host 'Generated code from .ui files'
 
+$build_vars_path = "$PSScriptRoot/../src/gen/build_vars.py"
 $BUILD_NUMBER = Get-Date -Format yyMMddHHmm
-New-Item "$PSScriptRoot/../src/gen/build_number.py" -ItemType File -Force -Value "AUTOSPLIT_BUILD_NUMBER = `"$BUILD_NUMBER`"" | Out-Null
+$GITHUB_REPOSITORY = If ($Env:GITHUB_REPOSITORY) { $Env:GITHUB_REPOSITORY } Else { 'Toufool/Auto-Split' }
+New-Item $build_vars_path -ItemType File -Force | Out-Null
+Add-Content $build_vars_path "AUTOSPLIT_BUILD_NUMBER = `"$BUILD_NUMBER`""
+Add-Content $build_vars_path "AUTOSPLIT_GITHUB_REPOSITORY = `"$GITHUB_REPOSITORY`""
 Write-Host "Generated build number: `"$BUILD_NUMBER`""
+Write-Host "Set repository to `"$GITHUB_REPOSITORY`""
 
 Set-Location $originalDirectory

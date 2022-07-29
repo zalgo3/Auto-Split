@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 import cv2
 from win32 import win32gui
 
-from gen.build_number import AUTOSPLIT_BUILD_NUMBER
+from gen.build_vars import AUTOSPLIT_BUILD_NUMBER, AUTOSPLIT_GITHUB_REPOSITORY
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, TypeGuard
@@ -111,4 +111,4 @@ DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
 """Set DIRTY_VERSION_EXTENSION to an empty string to generate a clean version number"""
 AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
 START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
-GITHUB_FORK = "Avasam/Auto-Split"
+GITHUB_REPOSITORY = AUTOSPLIT_GITHUB_REPOSITORY
