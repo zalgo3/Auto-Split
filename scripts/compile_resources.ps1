@@ -11,8 +11,7 @@ Write-Host 'Generated code from .ui files'
 
 $build_vars_path = "$PSScriptRoot/../src/gen/build_vars.py"
 $BUILD_NUMBER = Get-Date -Format yyMMddHHmm
-# $GITHUB_REPOSITORY = If ($Env:GITHUB_BASE_REPOSITORY) { $Env:GITHUB_BASE_REPOSITORY } Else { 'Toufool/Auto-Split' }
-$GITHUB_REPOSITORY = $Env:GITHUB_BASE_REPOSITORY
+$GITHUB_REPOSITORY = If ($Env:GITHUB_HEAD_REPOSITORY) { $Env:GITHUB_HEAD_REPOSITORY } Else { 'Toufool/Auto-Split' }
 New-Item $build_vars_path -ItemType File -Force | Out-Null
 Add-Content $build_vars_path "AUTOSPLIT_BUILD_NUMBER = `"$BUILD_NUMBER`""
 Add-Content $build_vars_path "AUTOSPLIT_GITHUB_REPOSITORY = `"$GITHUB_REPOSITORY`""
