@@ -364,7 +364,7 @@ It is highly recommended to NOT use pHash if you use masked images. It is very i
      </font>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Custom image settings and flags are set in the &lt;br&gt;&lt;/br&gt; image file name. These will override the default &lt;br&gt;&lt;/br&gt; values. View the &lt;a href=&quot;https://github.com/Toufool/Auto-Split#readme&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;README&lt;/span&gt;&lt;/a&gt; for full details on all &lt;br&gt;&lt;/br&gt; available custom image settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Custom image settings and flags are set in the &lt;br&gt;&lt;/br&gt; image file name. These will override the default &lt;br&gt;&lt;/br&gt; values. View the &lt;a href=&quot;https://github.com/{GITHUB_FORK}#readme&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;README&lt;/span&gt;&lt;/a&gt; for full details on all &lt;br&gt;&lt;/br&gt; available custom image settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QLabel" name="default_delay_time_label">

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 from PyQt6 import QtCore, QtWidgets
 
-from utils import FROZEN
+from utils import FROZEN, GITHUB_FORK
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -135,8 +135,8 @@ def already_running():
 
 
 CREATE_NEW_ISSUE_MESSAGE = (
-    "Please create a New Issue at <a href='https://github.com/Toufool/Auto-Split/issues'>"
-    + "github.com/Toufool/Auto-Split/issues</a>, describe what happened, "
+    f"Please create a New Issue at <a href='https://github.com/{GITHUB_FORK}/issues'>"
+    + f"github.com/{GITHUB_FORK}/issues</a>, describe what happened, "
     + "and copy & paste the entire error message below")
 
 

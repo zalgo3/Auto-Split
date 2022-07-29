@@ -111,3 +111,4 @@ DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
 """Set DIRTY_VERSION_EXTENSION to an empty string to generate a clean version number"""
 AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
 START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
+GITHUB_FORK = "Avasam/Auto-Split"

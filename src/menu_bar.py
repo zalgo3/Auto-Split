@@ -15,7 +15,7 @@ from capture_method import (CAPTURE_METHODS, CameraInfo, CaptureMethodEnum, chan
                             get_all_video_capture_devices)
 from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa F401
 from hotkeys import HOTKEYS, Hotkeys, set_hotkey
-from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, WINDOWS_BUILD_NUMBER, decimal, fire_and_forget
+from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, GITHUB_FORK, WINDOWS_BUILD_NUMBER, decimal, fire_and_forget
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
@@ -60,7 +60,7 @@ class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
             self.show()
 
     def open_update(self):
-        webbrowser.open("https://github.com/Toufool/Auto-Split/releases/latest")
+        webbrowser.open(f"https://github.com/{GITHUB_FORK}/releases/latest")
         self.close()
 
     def do_not_ask_me_again_state_changed(self):
@@ -75,7 +75,7 @@ def open_update_checker(autosplit: AutoSplit, latest_version: str, check_on_open
 
 
 def view_help():
-    webbrowser.open("https://github.com/Toufool/Auto-Split#tutorial")
+    webbrowser.open(f"https://github.com/{GITHUB_FORK}#tutorial")
 
 
 def about_qt():
@@ -89,7 +89,7 @@ def about_qt_for_python():
 @fire_and_forget
 def check_for_updates(autosplit: AutoSplit, check_on_open: bool = False):
     try:
-        response = requests.get("https://api.github.com/repos/Toufool/Auto-Split/releases/latest")
+        response = requests.get(f"https://api.github.com/repos/{GITHUB_FORK}/releases/latest")
         latest_version = str(response.json()["name"]).split("v")[1]
         autosplit.update_checker_widget_signal.emit(latest_version, check_on_open)
     except (RequestException, KeyError):
@@ -180,6 +180,11 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
             self.default_pause_time_spinbox.setFrame(False)
         # Don't autofocus any particular field
         self.setFocus()
+
+        self.custom_image_settings_info_label.setText(
+            self.custom_image_settings_info_label
+                .text()
+                .format(GITHUB_FORK=GITHUB_FORK))
 
 # region Build the Capture method combobox
         capture_method_values = CAPTURE_METHODS.values()
