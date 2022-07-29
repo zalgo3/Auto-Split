@@ -15,7 +15,8 @@ from capture_method import (CAPTURE_METHODS, CameraInfo, CaptureMethodEnum, chan
                             get_all_video_capture_devices)
 from gen import about, design, resources_rc, settings as settings_ui, update_checker  # noqa F401
 from hotkeys import HOTKEYS, Hotkeys, set_hotkey
-from utils import AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, GITHUB_REPOSITORY, WINDOWS_BUILD_NUMBER, decimal, fire_and_forget
+from utils import (AUTOSPLIT_VERSION, FIRST_WIN_11_BUILD, GITHUB_REPOSITORY, WINDOWS_BUILD_NUMBER, decimal,
+                   fire_and_forget)
 
 if TYPE_CHECKING:
     from AutoSplit import AutoSplit
