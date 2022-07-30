@@ -12,14 +12,16 @@ if TYPE_CHECKING:
 
 class CaptureMethodInterface():
     def __init__(self, autosplit: Optional[AutoSplit] = None):
+        # Some capture methods don't need an initialization process
+        pass
+
+    def close(self, autosplit: AutoSplit):
+        # Some capture methods don't need to cleanup and release any resource
         pass
 
     def reinitialize(self, autosplit: AutoSplit):
         self.close(autosplit)
         self.__init__(autosplit)  # pylint: disable=unnecessary-dunder-call
-
-    def close(self, autosplit: AutoSplit):
-        pass
 
     def get_frame(self, autosplit: AutoSplit) -> tuple[Optional[cv2.Mat], bool]:
         """

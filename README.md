@@ -22,6 +22,7 @@ This program can be used to automatically start, split, and reset your preferred
 
 ### Compatibility
 
+- Python 3.9+
 - Windows 10 and 11.
 
 ### Building

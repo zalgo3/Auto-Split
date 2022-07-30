@@ -30,7 +30,6 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
     last_captured_frame: Optional[cv2.Mat] = None
 
     def __init__(self, autosplit: AutoSplit):
-        super().__init__(autosplit)
         if not is_valid_hwnd(autosplit.hwnd):
             return
         # Note: Must create in the same thread (can't use a global) otherwise when ran from LiveSplit it will raise:
@@ -62,6 +61,8 @@ class WindowsGraphicsCaptureMethod(CaptureMethodInterface):
         self.session = session
         self.size = item.size
         self.frame_pool = frame_pool
+
+        super().__init__()
 
     def close(self, autosplit: AutoSplit):
         if self.frame_pool:

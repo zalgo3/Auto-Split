@@ -371,7 +371,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
             error_messages.region()
             return
 
-        # save and open image
+        # Save and open image
         cv2.imwrite(screenshot_path, capture)
         os.startfile(screenshot_path)  # nosec
 
@@ -823,6 +823,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
         def exit_program():
             if self.auto_control_loop:
                 self.auto_control_loop.cancel()
+            self.capture_method.close(self)
             if a0 is not None:
                 a0.accept()
             if self.is_auto_controlled:

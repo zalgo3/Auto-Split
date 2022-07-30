@@ -7,18 +7,17 @@
 # If you're having issues with the libraries, you might want to first run:
 # pip uninstall -y -r ./scripts/requirements-dev.txt
 #
-# Creating AutoSplit.exe with PyInstaller: ./scripts/build.ps1
+# Creating anAutoSplit executable with PyInstaller: ./scripts/build.ps1
 #
 # Dependencies:
 numpy>=1.23 # Updated types
 opencv-python-headless>=4.5.4,<4.6  # https://github.com/pyinstaller/pyinstaller/issues/6889
-PyQt6>=6.2.1
-PySide6
+PyQt6>=6.2.1 # Python 3.10 support
 ImageHash
 keyboard
 packaging
 Pillow
-pyautogui
+PyAutoGUI
 requests
 certifi
 toml
@@ -29,5 +28,6 @@ pywin32>=301
 winsdk>=v1.0.0b4
 git+https://github.com/ranchen421/D3DShot.git#egg=D3DShot  # https://github.com/SerpentAI/D3DShot/issues/44
 #
-# Build
+# Build and compile resources
 PyInstaller
+PySide6

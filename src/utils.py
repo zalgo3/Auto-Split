@@ -103,7 +103,7 @@ FIRST_WIN_11_BUILD = 22000
 FROZEN = hasattr(sys, "frozen")
 """Running from build made by PyInstaller"""
 auto_split_directory = os.path.dirname(sys.executable if FROZEN else os.path.abspath(__file__))
-"""The directory of either AutoSplit.exe or AutoSplit.py"""
+"""The directory of either the AutoSplit executable or AutoSplit.py"""
 
 # Shared strings
 # DIRTY_VERSION_EXTENSION = ""
