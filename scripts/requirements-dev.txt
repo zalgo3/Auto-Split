@@ -1,4 +1,4 @@
-# Usage: ./scripts/install.bat
+# Usage: ./scripts/install.ps1
 #
 # If you're having issues with the libraries, you might want to first run:
 # pip uninstall -y -r ./scripts/requirements-dev.txt
@@ -17,7 +17,7 @@ pep8-naming
 pylint>=2.13.9 # Respect ignore configuration options with --recursive=y
 pyright
 #
-# Run `designer.bat` to quickly open the bundled PyQt Designer.
+# Run `./scripts/designer.ps1` to quickly open the bundled PyQt Designer.
 # Can also be downloaded externally as a non-python package
 qt6-applications
 # Types

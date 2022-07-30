@@ -112,21 +112,19 @@ disable = [
   # No need to mention the fixmes
   "fixme",
   "missing-docstring",
-  # Already taken care of and grayed out. Also conflicts with Pylance reportIncompatibleMethodOverride
-  "unused-argument",
   # Already taken care of by Flake8 and isort
   "ungrouped-imports",
   "unused-import",
   "wrong-import-order",
   "wrong-import-position",
+  # Already taken care of and grayed out. Also conflicts with Pylance reportIncompatibleMethodOverride
+  "unused-argument",
   # Only reports a single instance. Pyright does a better job anyway
   "cyclic-import",
   # Doesn't work with local imports
   "import-error",
   # Similar lines in 2 files, doesn't really work
   "R0801",
-  # False positives with PyQt .connect
-  "no-value-for-parameter",
   # Not as long as we support Python 3.9
   "consider-alternative-union-syntax",
 ]

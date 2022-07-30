@@ -28,7 +28,7 @@
     // Use eslint-plugin-sonarjs for JS/TS projects
     "sonarsource.sonarlint-vscode",
     //
-    // Just don't recommend //
+    // Don't recommend to autoinstall //
     //
     // This is a Git project
     "johnstoncode.svn-scm",

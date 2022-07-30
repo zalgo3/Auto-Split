@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 
 import cv2
 
-from gen.build_number import AUTOSPLIT_BUILD_NUMBER
+from gen.build_vars import AUTOSPLIT_BUILD_NUMBER, AUTOSPLIT_GITHUB_REPOSITORY
 
 if sys.platform == "win32":
     import ctypes
@@ -129,3 +129,4 @@ DIRTY_VERSION_EXTENSION = "-" + AUTOSPLIT_BUILD_NUMBER
 AUTOSPLIT_VERSION = "2.0.0-alpha.4" + DIRTY_VERSION_EXTENSION
 START_AUTO_SPLITTER_TEXT = "Start Auto Splitter"
 MAXBYTE = 255
+GITHUB_REPOSITORY = AUTOSPLIT_GITHUB_REPOSITORY

@@ -56,7 +56,7 @@ class CaptureMethodMeta(EnumMeta):
     # Allow checking if simple string is enum
     def __contains__(self, other: str):
         try:
-            self(other)  # pyright: ignore [reportGeneralTypeIssues]
+            self(other)  # pyright: ignore [reportGeneralTypeIssues] pylint: disable=no-value-for-parameter
         except ValueError:
             return False
         else:

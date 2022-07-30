@@ -14,13 +14,16 @@ on:
     branches:
       - main
       - master
-      - dev
       - dev*
       - 2.0.0
     paths:
       - "**.py"
       - "**.pyi"
       - "**.ui"
+
+env:
+  GITHUB_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+
 jobs:
   Pyright:
     runs-on: ${{ matrix.os }}
