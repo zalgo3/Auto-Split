@@ -8,8 +8,9 @@
 #
 # Linting and formatters
 bandit
-isort
-flake8
+# https://github.com/PyCQA/flake8-pyi/issues/257
+# https://github.com/gforcada/flake8-isort/issues/115
+flake8<5 # Not supported by pyi and isort plugins
 flake8-pyi>=22.7 # New checks
 flake8-quotes
 flake8-isort
