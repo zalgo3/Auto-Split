@@ -35,7 +35,7 @@ class __AboutWidget(QtWidgets.QWidget, about.Ui_AboutAutoSplitWidget):
 
 
 def open_about(autosplit: AutoSplit):
-    if not autosplit.AboutWidget:
+    if not autosplit.AboutWidget or cast(QtWidgets.QWidget, autosplit.AboutWidget).isHidden():
         autosplit.AboutWidget = __AboutWidget()
 
 
@@ -71,7 +71,7 @@ class __UpdateCheckerWidget(QtWidgets.QWidget, update_checker.Ui_UpdateChecker):
 
 
 def open_update_checker(autosplit: AutoSplit, latest_version: str, check_on_open: bool):
-    if not autosplit.UpdateCheckerWidget:
+    if not autosplit.UpdateCheckerWidget or cast(QtWidgets.QWidget, autosplit.UpdateCheckerWidget).isHidden():
         autosplit.UpdateCheckerWidget = __UpdateCheckerWidget(latest_version, autosplit, check_on_open)
 
 
@@ -276,5 +276,5 @@ class __SettingsWidget(QtWidgets.QDialog, settings_ui.Ui_DialogSettings):
 
 
 def open_settings(autosplit: AutoSplit):
-    if not autosplit.SettingsWidget:
+    if not autosplit.SettingsWidget or cast(QtWidgets.QDialog, autosplit.SettingsWidget).isHidden():
         autosplit.SettingsWidget = __SettingsWidget(autosplit)
