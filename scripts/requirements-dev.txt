@@ -10,10 +10,10 @@
 bandit
 # https://github.com/PyCQA/flake8-pyi/issues/257
 # https://github.com/gforcada/flake8-isort/issues/115
-flake8<5 # Not supported by pyi and isort plugins
-flake8-pyi>=22.7 # New checks
+flake8>=5 # flake8-pyi deprecation warnings
+flake8-pyi>=22.8.1 # flake8 5 support
 flake8-quotes
-flake8-isort
+flake8-isort>=4.2 # flake8 5 support
 pep8-naming
 pylint>=2.13.9 # Respect ignore configuration options with --recursive=y
 pyright

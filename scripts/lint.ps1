@@ -3,6 +3,7 @@ Set-Location "$PSScriptRoot/.."
 $exitCodes = 0
 
 Write-Host "`nRunning Pyright..."
+$Env:PYRIGHT_PYTHON_FORCE_VERSION = 'latest'
 pyright --warnings
 $exitCodes += $LastExitCode
 if ($LastExitCode -gt 0) {
