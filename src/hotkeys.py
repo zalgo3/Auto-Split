@@ -220,6 +220,14 @@ def __get_hotkey_action(autosplit: AutoSplit, hotkey: Hotkeys):
 # reduce duplicated code. We should use a dictionary of hotkey class or something.
 
 
+def is_valid_hotkey_name(hotkey_name: str):
+    keys = hotkey_name.split("+")
+    for key in keys:
+        if key and not keyboard.is_modifier(keyboard.key_to_scan_codes(key)[0]):
+            return True
+    return False
+
+
 def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: str = ""):
     if autosplit.SettingsWidget:
         # Unfocus all fields
@@ -235,6 +243,13 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
         try:
             hotkey_name = preselected_hotkey_name if preselected_hotkey_name else __read_hotkey()
 
+            if not is_valid_hotkey_name(hotkey_name):
+                autosplit.show_error_signal.emit(lambda: error_messages.invalid_hotkey(hotkey_name))
+                return
+
+            # Try to remove the previously set hotkey if there is one
+            _unhook(getattr(autosplit, f"{hotkey}_hotkey"))
+            # Remove any hotkey using the same key combination
             __remove_key_already_set(autosplit, hotkey_name)
 
             action = __get_hotkey_action(autosplit, hotkey)
@@ -265,6 +280,4 @@ def set_hotkey(autosplit: AutoSplit, hotkey: Hotkeys, preselected_hotkey_name: s
         finally:
             autosplit.after_setting_hotkey_signal.emit()
 
-    # Try to remove the previously set hotkey if there is one.
-    _unhook(getattr(autosplit, f"{hotkey}_hotkey"))
     read_and_set_hotkey()
