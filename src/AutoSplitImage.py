@@ -17,12 +17,7 @@ if TYPE_CHECKING:
     from AutoSplit import AutoSplit
 
 # Resize to these width and height so that FPS performance increases
-COMPARISON_RESIZE_WIDTH = 320
-COMPARISON_RESIZE_HEIGHT = 240
-COMPARISON_RESIZE = (COMPARISON_RESIZE_WIDTH, COMPARISON_RESIZE_HEIGHT)
-COMPARISON_RESIZE_AREA = COMPARISON_RESIZE_WIDTH * COMPARISON_RESIZE_HEIGHT
-LOWER_BOUND = np.array([0, 0, 0, 1], dtype="uint8")
-UPPER_BOUND = np.array([MAXBYTE, MAXBYTE, MAXBYTE, MAXBYTE], dtype="uint8")
+COMPARISON_RESIZE_RESOLUTION = 320 * 240
 START_KEYWORD = "start_auto_splitter"
 RESET_KEYWORD = "reset"
 
@@ -111,20 +106,23 @@ class AutoSplitImage():
             return
 
         self._has_transparency = check_if_image_has_transparency(image)
-        comparison_resize = COMPARISON_RESIZE
         if self._has_transparency:
-            alpha_channel = image[:, :, 3]
-            resize_control_ratio = int(sqrt(COMPARISON_RESIZE_AREA / cv2.countNonZero(alpha_channel))) + 1
-            comparison_resize = (resize_control_ratio * COMPARISON_RESIZE_WIDTH,
-                                 resize_control_ratio * COMPARISON_RESIZE_HEIGHT)
-        image = cv2.resize(image, comparison_resize, interpolation=cv2.INTER_NEAREST)
-        # If image has transparency, create a mask
-        if self._has_transparency:
+            image_bgr, image_alpha = image[:, :, :3], image[:, :, 3]
+            scale = sqrt(min(1, COMPARISON_RESIZE_RESOLUTION / cv2.countNonZero(image_alpha)))
+            image_bgr = cv2.resize(image_bgr, dsize=None, fx=scale, fy=scale)
+            image_alpha = cv2.resize(image_alpha, dsize=None, fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
+            image = np.dstack((image_bgr, image_alpha))
+            # If image has transparency, create a mask
             # Create mask based on resized, nearest neighbor interpolated split image
-            self.mask = cv2.inRange(image, LOWER_BOUND, UPPER_BOUND)
-        # Add Alpha channel if missing
-        elif image.shape[2] == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+            self.mask = cv2.inRange(image_alpha, np.array([1], dtype="uint8"), np.array([MAXBYTE], dtype="uint8"))
+        else:
+            image_height, image_width = image.shape[:2]
+            image_resolution = image_height * image_width
+            scale = sqrt(COMPARISON_RESIZE_RESOLUTION / image_resolution)
+            image = cv2.resize(image, dsize=None, fx=scale, fy=scale)
+            # Add Alpha channel if missing
+            if image.shape[2] == 3:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
 
         self.bytes = image
 
