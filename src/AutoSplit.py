@@ -21,7 +21,7 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMes
 import error_messages
 import user_profile
 from auto_control import start_auto_control_loop
-from AutoSplitImage import COMPARISON_RESIZE, START_KEYWORD, AutoSplitImage, ImageType
+from AutoSplitImage import START_KEYWORD, AutoSplitImage, ImageType
 from capture_method import CaptureMethodEnum, CaptureMethodInterface
 from gen import about, design, settings, update_checker
 from hotkeys import HOTKEYS, after_setting_hotkey, send_command
@@ -737,7 +737,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
 
     def __get_capture_for_comparison(self):
         """
-        Grab capture region and resize for comparison
+        Grab capture region for comparison
         """
         capture, is_old_image = self.capture_method.get_frame(self)
 
@@ -755,8 +755,7 @@ class AutoSplit(QMainWindow, design.Ui_MainWindow):  # pylint: disable=too-many-
 
         return (None
                 if not is_valid_image(capture)
-                else cv2.resize(capture, COMPARISON_RESIZE, interpolation=cv2.INTER_NEAREST),
-                is_old_image)
+                else capture, is_old_image)
 
     def __reset_if_should(self, capture: Optional[cv2.Mat]):
         """

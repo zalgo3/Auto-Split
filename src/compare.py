@@ -5,7 +5,6 @@ from typing import Optional
 
 import cv2
 import imagehash  # https://github.com/JohannesBuchner/imagehash/issues/151
-import numpy as np
 from PIL import Image
 from win32con import MAXBYTE
 
@@ -52,7 +51,7 @@ def compare_l2_norm(source: cv2.Mat, capture: cv2.Mat, mask: Optional[cv2.Mat] =
     # The L2 Error is summed across all pixels, so this normalizes
     max_error = sqrt(source.size) * MAXBYTE \
         if not is_valid_image(mask)\
-        else sqrt(np.count_nonzero(mask) * MASK_SIZE_MULTIPLIER)
+        else sqrt(cv2.countNonZero(mask) * MASK_SIZE_MULTIPLIER)
 
     if not max_error:
         return 0.0
@@ -78,7 +77,7 @@ def compare_template(source: cv2.Mat, capture: cv2.Mat, mask: Optional[cv2.Mat] 
     # that the value can be. Used for normalizing from 0 to 1.
     max_error = source.size * MAXBYTE * MAXBYTE \
         if not is_valid_image(mask) \
-        else np.count_nonzero(mask)
+        else cv2.countNonZero(mask)
 
     return 1 - (min_val / max_error)
 
